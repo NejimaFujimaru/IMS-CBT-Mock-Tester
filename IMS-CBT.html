@@ -499,9 +499,9 @@ const CONFIG = {
   PASS_MARK: 50,
   SECTIONS: {
     english: { name: 'English', count: 20, weight: 1, icon: 'fa-language', order: 1 },
-    gk: { name: 'General Knowledge', count: 18, weight: 1, icon: 'fa-globe', order: 2 },
-    math: { name: 'Mathematics', count: 22, weight: 1, icon: 'fa-calculator', order: 3 },
-    analytical: { name: 'Analytical Reasoning', count: 27, weight: 2, icon: 'fa-brain', order: 4 }
+    gk: { name: 'General Knowledge', count: 20, weight: 1, icon: 'fa-globe', order: 2 },
+    math: { name: 'Mathematics', count: 30, weight: 1, icon: 'fa-calculator', order: 3 },
+    analytical: { name: 'Analytical Reasoning', count: 17, weight: 2, icon: 'fa-brain', order: 4 }
   },
   SECTION_ORDER: ['english', 'gk', 'math', 'analytical'],
   OPENROUTER: {
@@ -849,7 +849,8 @@ function generatePassageQuestions(globalUsedSet, globalUsedList) {
 // ==================== AI QUESTION GENERATION ====================
 async function generateSectionQuestions(sectionKey, count, globalUsedSet, globalUsedList) {
   const section = CONFIG.SECTIONS[sectionKey];
-
+  
+  // Enhanced prompt with stricter JSON enforcement
   const prompts = {
     english: `Generate exactly ${count} original English MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
 
@@ -863,13 +864,13 @@ MIX THESE TOPICS:
 - Grammar (parts of speech, punctuation)
 
 Difficulty: Intermediate (for intermediate/FSc level students)
-Return STRICT JSON only.`,
+Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
 
     gk: `Generate exactly ${count} original General Knowledge MCQs for a Pakistani university admission test (IMSciences/NTS NAT style).
 
 MIX THESE TOPICS (must include recent/current topics):
 - Pakistan Affairs (current PM, budget, CPEC, recent developments)
-- Current Affairs (2023-2024 international events, conflicts, summits)
+- Current Affairs (2023-2025 international events, conflicts, summits)
 - World Geography (capitals, landmarks, organizations)
 - Science (basic physics, chemistry, biology)
 - Islamic Studies (basic facts about Quran, Hadith, Islamic history)
@@ -879,7 +880,7 @@ MIX THESE TOPICS (must include recent/current topics):
 - Business/Economics (banks, economic terms)
 
 Questions should feel RECENT and RELEVANT to a 2024-2025 admission test.
-Return STRICT JSON only.`,
+Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
 
     math: `Generate exactly ${count} original Mathematics MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
 
@@ -897,7 +898,7 @@ MIX THESE TOPICS:
 - Word problems
 
 Difficulty: Intermediate (for intermediate/FSc level students)
-Return STRICT JSON only.`,
+Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
 
     analytical: `Generate exactly ${count} original Analytical Reasoning MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
 
@@ -912,7 +913,7 @@ MIX THESE TOPICS:
 - Statement and conclusion
 - Cause and effect reasoning
 - Ordering and ranking problems
-- Pattern recognition (number/letter series - simple patterns only, no complex math)
+- Pattern recognition (simple letter/number series - NO complex math)
 - Classification (odd one out)
 - Verbal analogies (A:B :: C:?)
 - Word associations
@@ -920,11 +921,11 @@ MIX THESE TOPICS:
 IMPORTANT RULES:
 - NO HCF, LCM, fractions, percentages, algebra, geometry, speed-distance, profit-loss
 - NO mathematical calculations beyond simple counting
-- Focus on LOGIC and REASONING
+- Focus on LOGIC and REASONING only
 - Include at least 3-4 verbal analogy questions
 - Include at least 1-2 seating arrangement or ordering questions
 
-Return STRICT JSON only.`
+Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`
   };
 
   const systemPrompt = `You are an expert CBT test question generator for Pakistani university admission tests (IMSciences Peshawar, NTS NAT style). Generate original multiple-choice questions.
@@ -938,17 +939,21 @@ STRICT RULES:
 - No empty question text or options
 - No duplicate options within a question
 - Provide a clear, educational explanation for each answer
-- Return STRICT JSON only - no markdown, no code blocks, no extra text
-- Questions must be UNIQUE and not repeat common textbook questions`;
+- Return STRICT JSON only - absolutely NO markdown, NO code fences (\`\`\`), NO extra text before or after JSON
+- Questions must be UNIQUE and not repeat common textbook questions
+- Do not use special characters that might break JSON (escape quotes properly)
+- Use simple ASCII characters where possible
+
+Your response must be ONLY this format:
+{"questions":[{"question":"text","options":["A","B","C","D"],"correctIndex":0,"explanation":"text","topic":"topic","difficulty":"easy"}]}`;
 
   const userPrompt = `${prompts[sectionKey]}
 
-Return ONLY this JSON format (no markdown, no code fences):
-{"questions":[{"question":"...","options":["...","...","...","..."],"correctIndex":0,"explanation":"...","topic":"...","difficulty":"easy|medium|hard"}]}`;
+Generate exactly ${count} unique questions. Return ONLY valid JSON with no markdown formatting.`;
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 35000);
 
     const response = await fetch(CONFIG.OPENROUTER.endpoint, {
       method: 'POST',
@@ -964,53 +969,62 @@ Return ONLY this JSON format (no markdown, no code fences):
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
         ],
-        temperature: 0.85,
-        max_tokens: 4000
+        temperature: 0.7,
+        max_tokens: 5000
       }),
       signal: controller.signal
     });
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) throw new Error(`API ${response.status}`);
-
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || '';
-
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch {
-      const jsonMatch = content.match(/\{[\s\S]*\}/);
-      if (jsonMatch) parsed = JSON.parse(jsonMatch[0]);
-      else throw new Error('Parse failed');
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
 
-    if (!parsed.questions || !Array.isArray(parsed.questions)) throw new Error('Invalid structure');
+    const data = await response.json();
+    let content = data.choices?.[0]?.message?.content || '';
+
+    if (!content.trim()) {
+      throw new Error('Empty response from API');
+    }
+
+    // Multi-stage cleaning and parsing
+    content = cleanAIResponse(content);
+    
+    let parsed = parseJSONWithRecovery(content);
+    
+    if (!parsed || !parsed.questions || !Array.isArray(parsed.questions)) {
+      throw new Error('Invalid structure after parsing');
+    }
 
     const validQuestions = [];
-    for (const q of parsed.questions) {
-      if (!q.question || q.question.trim().length < 8) continue;
-      if (!Array.isArray(q.options) || q.options.length !== 4) continue;
-      if (!q.options.every(o => o && o.trim().length > 0)) continue;
-      if (new Set(q.options).size !== 4) continue;
-      if (typeof q.correctIndex !== 'number' || q.correctIndex < 0 || q.correctIndex > 3) continue;
-      if (!q.explanation || q.explanation.trim().length < 5) continue;
+    const seenHashes = new Set();
 
+    for (const q of parsed.questions) {
+      // Strict validation
+      if (!validateQuestion(q)) continue;
+      
       const candidate = {
-        ...q,
-        section: sectionKey,
+        question: q.question.trim(),
+        options: q.options.map(o => o.trim()),
+        correctIndex: q.correctIndex,
+        explanation: q.explanation?.trim() || 'Explanation not provided.',
         topic: q.topic || section.name,
         difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : 'medium',
+        section: sectionKey,
         weight: section.weight,
         isAI: true,
         passageId: null
       };
 
+      // Check for duplicates
+      const hash = questionHash(candidate);
+      if (seenHashes.has(hash)) continue;
       if (isDuplicate(candidate, globalUsedSet, globalUsedList)) continue;
 
+      seenHashes.add(hash);
       validQuestions.push(candidate);
-      globalUsedSet.add(questionHash(candidate));
+      globalUsedSet.add(hash);
       globalUsedList.push(candidate);
 
       if (validQuestions.length >= count) break;
@@ -1018,9 +1032,74 @@ Return ONLY this JSON format (no markdown, no code fences):
 
     return validQuestions;
   } catch (err) {
-    console.warn(`AI failed for ${sectionKey}:`, err.message);
+    console.warn(`AI generation failed for ${sectionKey}:`, err.message);
     return [];
   }
+}
+
+// Clean AI response - remove markdown, code fences, extra text
+function cleanAIResponse(content) {
+  // Remove markdown code fences
+  content = content.replace(/```json\s*/gi, '');
+  content = content.replace(/```\s*/gi, '');
+  content = content.replace(/```javascript\s*/gi, '');
+  
+  // Remove any leading/trailing whitespace
+  content = content.trim();
+  
+  // Extract JSON object if embedded in text
+  const jsonMatch = content.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    return jsonMatch[0];
+  }
+  
+  return content;
+}
+
+// Parse JSON with multiple recovery strategies
+function parseJSONWithRecovery(content) {
+  // Strategy 1: Direct parse
+  try {
+    return JSON.parse(content);
+  } catch (e) {}
+  
+  // Strategy 2: Fix common JSON errors
+  let fixed = content;
+  
+  // Fix unescaped quotes in strings
+  fixed = fixed.replace(/(?<!\\)"/g, '\\"');
+  
+  // Try to extract and parse again
+  const jsonMatch = fixed.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    try {
+      return JSON.parse(jsonMatch[0]);
+    } catch (e) {}
+  }
+  
+  // Strategy 3: Try to find array
+  const arrayMatch = fixed.match(/\[[\s\S]*\]/);
+  if (arrayMatch) {
+    try {
+      const arr = JSON.parse(arrayMatch[0]);
+      return { questions: arr };
+    } catch (e) {}
+  }
+  
+  return null;
+}
+
+// Validate question structure
+function validateQuestion(q) {
+  if (!q || typeof q !== 'object') return false;
+  if (!q.question || q.question.trim().length < 5) return false;
+  if (!Array.isArray(q.options) || q.options.length !== 4) return false;
+  if (!q.options.every(o => o && typeof o === 'string' && o.trim().length > 0)) return false;
+  // Check for duplicate options
+  if (new Set(q.options.map(o => o.trim())).size !== 4) return false;
+  if (typeof q.correctIndex !== 'number' || q.correctIndex < 0 || q.correctIndex > 3) return false;
+  if (!q.explanation || q.explanation.trim().length < 3) return false;
+  return true;
 }
 
 // ==================== INIT ====================
