@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { NextResponse } from 'next/server';
 
 export const config = {
   runtime: 'edge',
@@ -6,45 +6,61 @@ export const config = {
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    return NextResponse.json({ error: 'Method not allowed' }, { status: 405 });
   }
 
   const { messages } = await req.json();
 
-  if (!process.env.OPENROUTER_API_KEY) {
-    return new Response(JSON.stringify({ error: 'API Key missing on server' }), { status: 500 });
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    console.error('Missing OPENROUTER_API_KEY environment variable');
+    return NextResponse.json(
+      { error: 'Server configuration error: Missing API Key' },
+      { status: 500 }
+    );
   }
 
-  const openai = new OpenAI({
-    baseURL: 'https://openrouter.ai/api/v1',
-    apiKey: process.env.OPENROUTER_API_KEY,
-    defaultHeaders: {
-      'HTTP-Referer': 'https://your-vercel-app.vercel.app', // Replace with your actual Vercel URL
-      'X-Title': 'ASQScholar CBT Mock Test',
-    },
-  });
-
   try {
-    const completion = await openai.chat.completions.create({
-      model: 'openrouter/free',
-      messages: messages,
-      temperature: 0.7,
-      max_tokens: 4096,
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://ims-cbt-mock-tester.vercel.app/',
+        'X-Title': 'ASQScholar CBT Mock Test',
+      },
+      body: JSON.stringify({
+        model: 'openrouter/free',
+        messages: messages,
+        temperature: 0.7,
+        max_tokens: 4096,
+      }),
     });
 
-    const content = completion.choices[0]?.message?.content;
-    
-    if (!content) {
-      throw new Error('No content received from AI');
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`OpenRouter API Error: ${response.status} - ${errorText}`);
+      return NextResponse.json(
+        { error: `AI Service Error: ${response.status}` },
+        { status: response.status }
+      );
     }
 
-    return new Response(JSON.stringify({ result: content }), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const data = await response.json();
+    
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      throw new Error('Invalid response structure from AI');
+    }
+
+    const content = data.choices[0].message.content;
+
+    return NextResponse.json({ result: content });
+    
   } catch (error) {
-    console.error('OpenRouter Error:', error);
-    return new Response(JSON.stringify({ error: error.message || 'AI Generation Failed' }), { 
-      status: 500 
-    });
+    console.error('Server Error:', error);
+    return NextResponse.json(
+      { error: 'Internal Server Error', details: error.message },
+      { status: 500 }
+    );
   }
 }
