@@ -852,18 +852,18 @@ async function generateSectionQuestions(sectionKey, count, globalUsedSet, global
   
   // Enhanced prompt with stricter JSON enforcement
   const prompts = {
-    english: `Generate exactly ${count} original English MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
+    english: `Generate exactly ${count} original English MCQs for a Pakistani university admission test (NTS NAT STANDARD level).
 
 MIX THESE TOPICS:
-- Synonyms (advanced vocabulary)
-- Antonyms (advanced vocabulary)
-- Sentence correction (subject-verb agreement, tenses, articles, prepositions)
-- Verbal analogies (A:B :: C:?)
-- Idioms and phrases
-- Reading comprehension (short passage with 1-2 questions)
-- Grammar (parts of speech, punctuation)
+- Synonyms (advanced vocabulary - GRE/SAT level words)
+- Antonyms (advanced vocabulary - GRE/SAT level words)
+- Sentence correction (complex subject-verb agreement, tenses, articles, prepositions, parallelism)
+- Verbal analogies (A:B :: C:? with complex relationships)
+- Idioms and phrases (advanced usage)
+- Reading comprehension (dense passage with inference-based questions)
+- Grammar (advanced parts of speech, punctuation, sentence structure)
 
-Difficulty: Intermediate (for intermediate/FSc level students)
+Difficulty: HARD - Match NTS NAT difficulty. Include challenging vocabulary and complex sentence structures.
 Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
 
     gk: `Generate exactly ${count} original General Knowledge MCQs for a Pakistani university admission test (IMSciences/NTS NAT style).
@@ -882,7 +882,7 @@ MIX THESE TOPICS (must include recent/current topics):
 Questions should feel RECENT and RELEVANT to a 2024-2025 admission test.
 Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
 
-    math: `Generate exactly ${count} original Mathematics MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
+    math: `Generate exactly ${count} original Mathematics MCQs for a Pakistani university admission test (NTS NAT STANDARD - HARD DIFFICULTY).
 
 MIX THESE TOPICS:
 - Percentages and ratios
