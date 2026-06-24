@@ -67,7 +67,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 
 .main-content { max-width: 1440px; margin: 0 auto; padding: 20px 28px; }
 
-/* Compact stats grid */
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .stat-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
 .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
@@ -88,7 +87,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 [data-theme="dark"] .pace-badge.on-track { background: #1e3a5f; color: #93c5fd; }
 .pace-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 
-/* Compact question card */
 .question-card { background: var(--bg-secondary); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); overflow: hidden; }
 .question-header { padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); background: linear-gradient(to bottom, var(--bg-secondary), rgba(0,0,0,0.01)); }
 .question-number-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); }
@@ -135,7 +133,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .btn-lg { padding: 12px 28px; font-size: 14px; }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
-/* Landing */
 .landing-container { max-width: 640px; margin: 60px auto; text-align: center; padding: 0 20px; }
 .landing-logo { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 32px; }
 .landing-logo-icon { width: 56px; height: 56px; background: linear-gradient(135deg, var(--bg-header), var(--bg-header-dark)); border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; font-size: 26px; box-shadow: 0 8px 20px rgba(44, 95, 124, 0.3); }
@@ -155,7 +152,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .form-input:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); background: var(--bg-secondary); }
 .start-btn { width: 100%; padding: 14px; font-size: 15px; font-weight: 700; margin-top: 6px; justify-content: center; }
 
-/* Results */
 .results-container { max-width: 960px; margin: 0 auto; }
 .results-header { text-align: center; margin-bottom: 24px; }
 .results-header h2 { font-size: 28px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.5px; }
@@ -187,7 +183,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .result-stat.percentage .result-stat-value { color: var(--accent-blue); }
 .results-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* Review */
 .review-container { max-width: 960px; margin: 0 auto; }
 .review-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
 .review-header h2 { font-size: 22px; font-weight: 700; }
@@ -217,7 +212,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .review-explanation { padding: 12px 14px; background: var(--bg-primary); border-radius: 7px; font-size: 13px; line-height: 1.6; color: var(--text-secondary); border-left: 3px solid var(--accent-blue); }
 .review-explanation strong { color: var(--text-primary); font-weight: 700; }
 
-/* Loading */
 .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 3000; }
 .loading-box { background: var(--bg-secondary); border-radius: var(--radius); padding: 36px 40px; text-align: center; box-shadow: var(--shadow-lg); max-width: 440px; width: 90%; }
 .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
@@ -328,7 +322,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
   <div class="loading-box">
     <div class="loading-spinner"></div>
     <h3 id="loadingTitle">Generating Your Test</h3>
-    <p id="loadingMessage">Creating fresh questions...</p>
+    <p id="loadingMessage">Creating fresh questions with AI...</p>
     <div class="loading-progress"><div class="loading-progress-fill" id="loadingProgressFill"></div></div>
     <div class="section-progress-list" id="sectionProgressList"></div>
   </div>
@@ -498,34 +492,25 @@ const CONFIG = {
   MAX_SAVED: 26,
   PASS_MARK: 50,
   SECTIONS: {
-    english: { name: 'English', count: 20, weight: 1, icon: 'fa-language', order: 1 },
-    gk: { name: 'General Knowledge', count: 20, weight: 1, icon: 'fa-globe', order: 2 },
-    math: { name: 'Mathematics', count: 30, weight: 1, icon: 'fa-calculator', order: 3 },
-    analytical: { name: 'Analytical Reasoning', count: 17, weight: 2, icon: 'fa-brain', order: 4 }
+    english:    { name: 'English',              count: 20, weight: 1, icon: 'fa-language',   order: 1 },
+    gk:         { name: 'General Knowledge',    count: 20, weight: 1, icon: 'fa-globe',      order: 2 },
+    math:       { name: 'Mathematics',          count: 30, weight: 1, icon: 'fa-calculator', order: 3 },
+    analytical: { name: 'Analytical Reasoning', count: 17, weight: 2, icon: 'fa-brain',      order: 4 }
   },
-    SECTION_ORDER: ['english', 'gk', 'math', 'analytical'],
-  
-  // Secure API Caller - Calls our own backend, not OpenRouter directly
-  async callSecureAI(prompt, section) {
-    try {
-      const response = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, section })
-      });
+  SECTION_ORDER: ['english', 'gk', 'math', 'analytical'],
 
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Generation failed');
-      }
-
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || '';
-      
-    } catch (error) {
-      console.error(`API Error for ${section}:`, error);
-      throw error;
+  async callSecureAI(prompt, systemPrompt, section) {
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, systemPrompt, section })
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `Server error: ${response.status}`);
     }
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '';
   }
 };
 
@@ -548,19 +533,13 @@ let state = {
 const DedupEngine = {
   STORAGE_KEY: 'asq_dedup_v3',
   MAX_HISTORY: 800,
-
-  load() {
-    try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}'); } catch { return {}; }
-  },
+  load() { try { return JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}'); } catch { return {}; } },
   save(h) { try { localStorage.setItem(this.STORAGE_KEY, JSON.stringify(h)); } catch {} },
-
   getGlobalUsed() {
-    const h = this.load();
-    const all = new Set();
+    const h = this.load(); const all = new Set();
     Object.values(h).forEach(arr => { if (Array.isArray(arr)) arr.forEach(x => all.add(x)); });
     return all;
   },
-
   recordUsed(sectionKey, hashes) {
     const h = this.load();
     if (!h[sectionKey]) h[sectionKey] = [];
@@ -568,7 +547,6 @@ const DedupEngine = {
     if (h[sectionKey].length > this.MAX_HISTORY) h[sectionKey] = h[sectionKey].slice(-this.MAX_HISTORY);
     this.save(h);
   },
-
   clear() { try { localStorage.removeItem(this.STORAGE_KEY); } catch {} }
 };
 
@@ -586,37 +564,29 @@ function questionHash(q) {
 }
 
 function similarityScore(a, b) {
-  const na = normalizeText(a);
-  const nb = normalizeText(b);
+  const na = normalizeText(a); const nb = normalizeText(b);
   if (na === nb) return 1;
-  if (na.length === 0 || nb.length === 0) return 0;
-  // Check substring
+  if (!na.length || !nb.length) return 0;
   if (na.includes(nb) || nb.includes(na)) {
-    const shorter = na.length < nb.length ? na : nb;
-    const longer = na.length >= nb.length ? na : nb;
-    return shorter.length / longer.length;
+    const s = na.length < nb.length ? na : nb; const l = na.length >= nb.length ? na : nb;
+    return s.length / l.length;
   }
-  // Word overlap
-  const wordsA = new Set(na.split(' '));
-  const wordsB = new Set(nb.split(' '));
-  let common = 0;
-  wordsA.forEach(w => { if (wordsB.has(w)) common++; });
-  const total = Math.max(wordsA.size, wordsB.size);
+  const wa = new Set(na.split(' ')); const wb = new Set(nb.split(' '));
+  let common = 0; wa.forEach(w => { if (wb.has(w)) common++; });
+  const total = Math.max(wa.size, wb.size);
   return total > 0 ? common / total : 0;
 }
 
-function isDuplicate(question, globalUsedSet, globalUsedList, similarityThreshold = 0.75) {
+function isDuplicate(question, globalUsedSet, globalUsedList, threshold = 0.75) {
   const hash = questionHash(question);
   if (globalUsedSet.has(hash)) return true;
-  // Similarity check against recent questions
-  const recentQuestions = globalUsedList.slice(-100);
-  for (const used of recentQuestions) {
-    if (similarityScore(question.question, used.question) >= similarityThreshold) return true;
+  for (const used of globalUsedList.slice(-100)) {
+    if (similarityScore(question.question, used.question) >= threshold) return true;
   }
   return false;
 }
 
-// ==================== FALLBACK QUESTION BANKS (SECTION-SPECIFIC, NO OVERLAP) ====================
+// ==================== FALLBACK QUESTION BANKS ====================
 const FALLBACK_QUESTIONS = {
   english: [
     { q: "Choose the word opposite in meaning to: ABUNDANT", opts: ["Plentiful", "Scarce", "Ample", "Copious"], ans: 1, exp: "Abundant means existing in large quantities. Scarce means insufficient - the opposite.", topic: "Antonyms" },
@@ -640,7 +610,6 @@ const FALLBACK_QUESTIONS = {
     { q: "PAINTER : BRUSH :: SCULPTOR : ___", opts: ["Canvas", "Chisel", "Paint", "Clay"], ans: 1, exp: "A sculptor's primary tool is a chisel.", topic: "Analogies" },
     { q: "Correct sentence:", opts: ["Each have completed.", "Each has completed his work.", "Each have completed their.", "Each has completed works."], ans: 1, exp: "'Each' is singular, takes 'has'.", topic: "Grammar" },
     { q: "Opposite of CANDID:", opts: ["Honest", "Frank", "Deceptive", "Open"], ans: 2, exp: "Candid means truthful; deceptive means misleading.", topic: "Antonyms" },
-    { q: "Choose the correct punctuation:", opts: ["Its a beautiful day isnt it", "It's a beautiful day, isn't it?", "Its a beautiful day, isnt it?", "It's a beautiful day isnt it."], ans: 1, exp: "Needs apostrophes, comma before tag question, and question mark.", topic: "Grammar" },
     { q: "Synonym of RESILIENT:", opts: ["Fragile", "Tough", "Weak", "Delicate"], ans: 1, exp: "Resilient means able to recover quickly - tough.", topic: "Synonyms" },
     { q: "WATER is to THIRST as FOOD is to ___", opts: ["Cook", "Hunger", "Eat", "Taste"], ans: 1, exp: "Water satisfies thirst; food satisfies hunger.", topic: "Analogies" },
     { q: "Meaning of 'Piece of cake':", opts: ["A dessert", "Something easy", "A small portion", "A bakery item"], ans: 1, exp: "'Piece of cake' means something very easy to do.", topic: "Idioms" },
@@ -648,43 +617,38 @@ const FALLBACK_QUESTIONS = {
     { q: "Synonym of ELOQUENT:", opts: ["Silent", "Articulate", "Confused", "Mumbling"], ans: 1, exp: "Eloquent means fluent and persuasive in speech - articulate.", topic: "Synonyms" },
     { q: "Choose the correct form: Neither he nor I ___ going.", opts: ["am", "is", "are", "was"], ans: 0, exp: "With 'neither...nor', verb agrees with nearest subject 'I' - use 'am'.", topic: "Grammar" },
     { q: "Meaning of 'Bite the bullet':", opts: ["To eat hard food", "To face a difficult situation bravely", "To shoot", "To be injured"], ans: 1, exp: "It means to endure a painful experience bravely.", topic: "Idioms" },
-    { q: "Synonym of BENEVOLENT:", opts: ["Malevolent", "Kind", "Cruel", "Harsh"], ans: 1, exp: "Benevolent means well-meaning and kindly.", topic: "Synonyms" },
-    { q: "Opposite of GARRULOUS:", opts: ["Talkative", "Taciturn", "Chatty", "Verbose"], ans: 1, exp: "Garrulous means talkative; taciturn means reserved in speech.", topic: "Antonyms" },
     { q: "BIRD : NEST :: LION : ___", opts: ["Cave", "Den", "Forest", "Jungle"], ans: 1, exp: "A bird lives in a nest; a lion lives in a den.", topic: "Analogies" },
     { q: "Synonym of COGNIZANT:", opts: ["Unaware", "Ignorant", "Aware", "Oblivious"], ans: 2, exp: "Cognizant means having knowledge or being aware.", topic: "Synonyms" }
   ],
-
   gk: [
     { q: "As of 2024, who is the Prime Minister of Pakistan?", opts: ["Imran Khan", "Shehbaz Sharif", "Nawaz Sharif", "Bilawal Bhutto"], ans: 1, exp: "Shehbaz Sharif has been serving as Prime Minister since 2024 after coalition government formation.", topic: "Pakistan Affairs" },
     { q: "The fall of the Berlin Wall occurred in which year?", opts: ["1985", "1987", "1989", "1991"], ans: 2, exp: "The Berlin Wall was opened on November 9, 1989.", topic: "World History" },
     { q: "Who invented the polio vaccine?", opts: ["Jonas Salk", "Albert Sabin", "Alexander Fleming", "Robert Koch"], ans: 0, exp: "Jonas Salk developed the first successful polio vaccine, proven effective in 1955.", topic: "Science" },
-    { q: "Which country has the highest number of UNESCO World Heritage Sites?", opts: ["Italy", "China", "Spain", "Germany"], ans: 0, exp: "Italy leads with 58 UNESCO World Heritage Sites.", topic: "World Affairs" },
-    { q: "Which city hosted the first Two-Nation Theory conference in 1906?", opts: ["Kolkata", "Lahore", "Delhi", "Karachi"], ans: 0, exp: "The All India Muhammadan Educational Conference was held in Kolkata in 1906.", topic: "Pakistan History" },
     { q: "The capital of Canada is:", opts: ["Toronto", "Ottawa", "Vancouver", "Montreal"], ans: 1, exp: "Ottawa has been the capital of Canada since 1857.", topic: "World Geography" },
     { q: "The first President of Pakistan was:", opts: ["Iskander Mirza", "Ayub Khan", "Zulfikar Ali Bhutto", "Yahya Khan"], ans: 0, exp: "Iskander Mirza became the first President after the 1956 constitution.", topic: "Pakistan History" },
     { q: "The unit of electric current is:", opts: ["Volt", "Ampere", "Ohm", "Watt"], ans: 1, exp: "The ampere (A) is the SI base unit for electric current.", topic: "Science" },
     { q: "Which of the following is the first surah of the Quran?", opts: ["Al-Baqarah", "Al-Fatiha", "Yasin", "Ikhlas"], ans: 1, exp: "Al-Fatiha is the first chapter of the Quran.", topic: "Islamic Studies" },
     { q: "Which element has atomic number 1?", opts: ["Helium", "Carbon", "Oxygen", "Hydrogen"], ans: 3, exp: "Hydrogen is the first element on the periodic table.", topic: "Science" },
-    { q: "The Mughal emperor who built the Jama Masjid of Delhi was:", opts: ["Akbar", "Shah Jahan", "Aurangzeb", "Jahangir"], ans: 1, exp: "Shah Jahan commissioned the Jama Masjid, completed in 1656.", topic: "History" },
-    { q: "The capital of Punjab province during British rule was:", opts: ["Lahore", "Karachi", "Delhi", "Amritsar"], ans: 0, exp: "Lahore served as the administrative capital of Punjab during British era.", topic: "Pakistan History" },
     { q: "Which gas is most abundant in Earth's atmosphere?", opts: ["Nitrogen", "Oxygen", "Carbon dioxide", "Helium"], ans: 0, exp: "Nitrogen makes up about 78% of Earth's atmosphere.", topic: "Science" },
     { q: "Which is the longest river in Pakistan?", opts: ["Indus River", "Kabul River", "Jhelum River", "Chenab River"], ans: 0, exp: "The Indus River stretches about 3,180 km.", topic: "Pakistan Geography" },
     { q: "The largest continent by land area is:", opts: ["Africa", "Asia", "North America", "South America"], ans: 1, exp: "Asia covers about 44.58 million km2.", topic: "World Geography" },
     { q: "Which country hosted the 2022 FIFA World Cup?", opts: ["Qatar", "Brazil", "Germany", "USA"], ans: 0, exp: "Qatar hosted the 2022 FIFA World Cup.", topic: "Sports" },
-    { q: "The Thar Desert is located primarily in:", opts: ["Pakistan", "Afghanistan", "Iran", "China"], ans: 0, exp: "The Thar Desert covers large parts of western Pakistan.", topic: "Geography" },
     { q: "The 'Mountbatten Plan' led to the creation of:", opts: ["Pakistan", "India", "Bangladesh", "Sri Lanka"], ans: 0, exp: "The Mountbatten Plan (1947) partitioned British India into India and Pakistan.", topic: "Pakistan History" },
     { q: "Who won the Nobel Peace Prize in 2014 alongside Kailash Satyarthi?", opts: ["Malala Yousafzai", "Aung San Suu Kyi", "Liu Xiaobo", "Barack Obama"], ans: 0, exp: "Malala Yousafzai won the Nobel Peace Prize in 2014.", topic: "World Affairs" },
     { q: "The headquarters of the United Nations is located in:", opts: ["Geneva", "New York", "London", "Paris"], ans: 1, exp: "UN headquarters is in New York City, USA.", topic: "World Affairs" },
     { q: "Which Pakistani cricketer is known as the 'Sultan of Swing'?", opts: ["Wasim Akram", "Waqar Younis", "Imran Khan", "Shoaib Akhtar"], ans: 0, exp: "Wasim Akram is known as the Sultan of Swing.", topic: "Sports" },
-    { q: "The Pakistan Federal Budget for 2024-25 was presented in which month?", opts: ["April", "May", "June", "July"], ans: 2, exp: "The federal budget is typically presented in June.", topic: "Pakistan Affairs" },
     { q: "Which organization is responsible for nuclear safety standards globally?", opts: ["WHO", "IAEA", "UNESCO", "WTO"], ans: 1, exp: "IAEA (International Atomic Energy Agency) sets nuclear safety standards.", topic: "World Affairs" },
     { q: "The CPEC (China-Pakistan Economic Corridor) was launched in:", opts: ["2013", "2015", "2017", "2019"], ans: 1, exp: "CPEC was launched in 2015.", topic: "Pakistan Affairs" },
     { q: "Which country won the ICC Cricket World Cup 2023?", opts: ["India", "Australia", "England", "New Zealand"], ans: 1, exp: "Australia won the 2023 ICC Cricket World Cup.", topic: "Sports" },
-    { q: "The largest Islamic bank in Pakistan is:", opts: ["Meezan Bank", "Bank Al Habib", "UBL", "HBL"], ans: 0, exp: "Meezan Bank is the largest Islamic bank in Pakistan.", topic: "Business" },
+    { q: "The OIC (Organization of Islamic Cooperation) headquarters is in:", opts: ["Riyadh", "Jeddah", "Istanbul", "Cairo"], ans: 1, exp: "OIC headquarters is in Jeddah, Saudi Arabia.", topic: "World Affairs" },
     { q: "Which planet is known as the Morning Star?", opts: ["Mars", "Venus", "Mercury", "Jupiter"], ans: 1, exp: "Venus is called the Morning Star.", topic: "Science" },
-    { q: "The OIC (Organization of Islamic Cooperation) headquarters is in:", opts: ["Riyadh", "Jeddah", "Istanbul", "Cairo"], ans: 1, exp: "OIC headquarters is in Jeddah, Saudi Arabia.", topic: "World Affairs" }
+    { q: "Largest Islamic bank in Pakistan:", opts: ["Meezan Bank", "Bank Al Habib", "UBL", "HBL"], ans: 0, exp: "Meezan Bank is the largest Islamic bank in Pakistan.", topic: "Business" },
+    { q: "The Mughal emperor who built the Jama Masjid of Delhi was:", opts: ["Akbar", "Shah Jahan", "Aurangzeb", "Jahangir"], ans: 1, exp: "Shah Jahan commissioned the Jama Masjid, completed in 1656.", topic: "History" },
+    { q: "Thar Desert is located primarily in:", opts: ["Pakistan", "Afghanistan", "Iran", "China"], ans: 0, exp: "The Thar Desert covers large parts of western Pakistan.", topic: "Geography" },
+    { q: "Which is the national language of Pakistan?", opts: ["English", "Pashto", "Urdu", "Punjabi"], ans: 2, exp: "Urdu is the national language of Pakistan as stated in the Constitution.", topic: "Pakistan Affairs" },
+    { q: "SCO (Shanghai Cooperation Organisation) headquarters is in:", opts: ["Beijing", "Moscow", "Islamabad", "Tashkent"], ans: 0, exp: "SCO Secretariat is headquartered in Beijing, China.", topic: "World Affairs" },
+    { q: "Pakistan's Constitution was enforced on:", opts: ["14 August 1947", "23 March 1956", "14 August 1973", "14 August 1956"], ans: 2, exp: "The current Constitution of Pakistan came into force on 14 August 1973.", topic: "Pakistan Affairs" }
   ],
-
   math: [
     { q: "What is 15% of 200?", opts: ["20", "25", "30", "35"], ans: 2, exp: "15% of 200 = (15/100) x 200 = 30.", topic: "Percentages" },
     { q: "If x + 5 = 12, what is x?", opts: ["5", "6", "7", "8"], ans: 2, exp: "x = 12 - 5 = 7.", topic: "Algebra" },
@@ -719,9 +683,7 @@ const FALLBACK_QUESTIONS = {
     { q: "A number increased by 20% becomes 96. Original number?", opts: ["72", "76", "80", "84"], ans: 2, exp: "x * 1.2 = 96, x = 80.", topic: "Percentages" },
     { q: "If 2x + 3y = 12 and x = 3, find y.", opts: ["1", "2", "3", "4"], ans: 1, exp: "2(3) + 3y = 12, 3y = 6, y = 2.", topic: "Algebra" }
   ],
-
   analytical: [
-    // Pure reasoning - NO math
     { q: "All Bloops are Razzies. All Razzies are Lazzies. Are all Bloops definitely Lazzies?", opts: ["True", "False", "Cannot determine", "Sometimes"], ans: 0, exp: "Classic syllogism: if A is subset of B and B is subset of C, then A is subset of C.", topic: "Logic" },
     { q: "A is the father of B. B is the sister of C. C is the son of D. How is D related to A?", opts: ["Wife", "Husband", "Mother", "Cannot determine"], ans: 0, exp: "D is the other parent of C. Since A is father, D must be the mother (A's wife).", topic: "Blood Relations" },
     { q: "If 'CAT' is coded as 'DBU', how is 'DOG' coded?", opts: ["EPH", "FPH", "ENH", "DPH"], ans: 0, exp: "Each letter is shifted forward by 1: D->E, O->P, G->H = EPH.", topic: "Coding-Decoding" },
@@ -731,42 +693,29 @@ const FALLBACK_QUESTIONS = {
     { q: "Complete the series: AZ, BY, CX, DW, ?", opts: ["EV", "EU", "FV", "EW"], ans: 0, exp: "First letters forward (A,B,C,D,E), second letters backward (Z,Y,X,W,V). Answer: EV.", topic: "Letter Series" },
     { q: "Pointing to a photograph: 'I have no siblings, but that man's father is my father's son.' Whose photo is it?", opts: ["His own", "His son's", "His father's", "His nephew's"], ans: 1, exp: "'My father's son' (no siblings) = speaker. 'That man's father is me' = his son.", topic: "Blood Relations" },
     { q: "If the day before yesterday was Thursday, what day is the day after tomorrow?", opts: ["Sunday", "Monday", "Tuesday", "Wednesday"], ans: 1, exp: "Day before yesterday=Thu, Yesterday=Fri, Today=Sat, Tomorrow=Sun, Day after tomorrow=Mon.", topic: "Calendar" },
-    { q: "A clock shows 3:15. What is the angle between hour and minute hands?", opts: ["0 deg", "7.5 deg", "15 deg", "22.5 deg"], ans: 1, exp: "Minute hand at 90 deg. Hour hand at 90 + 7.5 = 97.5 deg. Angle = 7.5 deg.", topic: "Clocks" },
     { q: "Statements: All roses are flowers. Some flowers fade quickly. Conclusions: I. Some roses fade quickly. II. All flowers are roses.", opts: ["Only I follows", "Only II follows", "Both follow", "Neither follows"], ans: 3, exp: "Cannot conclude roses fade quickly (those flowers may not be roses). Neither follows.", topic: "Syllogism" },
     { q: "Complete: 1, 1, 2, 3, 5, 8, 13, ?", opts: ["18", "20", "21", "26"], ans: 2, exp: "Fibonacci sequence: each number is sum of two preceding. 8+13=21.", topic: "Number Series" },
     { q: "Series: 7, 10, 8, 11, 9, 12, ...?", opts: ["7", "10", "12", "13"], ans: 1, exp: "Alternating +3, -2 pattern. After 12: 12-2=10.", topic: "Number Series" },
-    { q: "A+B means A is brother of B. AxB means A is father of B. A/B means A is sister of B. Which means P is maternal uncle of Q?", opts: ["P+MxQ", "P+M/Q", "PxM+Q", "P/M+Q"], ans: 1, exp: "P+M (P is brother of M), M/Q (M is sister of Q). P is brother of Q's mother = maternal uncle.", topic: "Blood Relations" },
     { q: "Pointing to a man: 'His mother is the only daughter of my mother.' How is the man related to the speaker?", opts: ["Brother", "Son", "Uncle", "Father"], ans: 1, exp: "'Only daughter of my mother' = speaker (female). His mother is me = he is my son.", topic: "Blood Relations" },
     { q: "Series: 3, 6, 11, 18, 27, ?", opts: ["36", "38", "40", "42"], ans: 1, exp: "Differences: 3,5,7,9,11. Next: 27+11=38.", topic: "Number Series" },
-    { q: "If COMPUTER is coded as RFUVQNPC, how is MEDICINE coded?", opts: ["EOJDJEFM", "EOJDEJFM", "MFEJDJOE", "MFEDJJOE"], ans: 0, exp: "Reverse the word and shift each letter +1: MEDICINE->ENICIDEM->EOJDJEFM.", topic: "Coding-Decoding" },
     { q: "TEACHER : STUDENT :: DOCTOR : ?", opts: ["Hospital", "Patient", "Medicine", "Nurse"], ans: 1, exp: "A teacher teaches a student; a doctor treats a patient.", topic: "Verbal Analogy" },
-    { q: "BOOK : READING :: FORK : ?", opts: ["Drawing", "Writing", "Eating", "Cooking"], ans: 2, exp: "A book is used for reading; a fork is used for eating.", topic: "Verbal Analogy" },
-    { q: "BIRD : NEST :: LION : ?", opts: ["Cave", "Den", "Forest", "Jungle"], ans: 1, exp: "A bird lives in a nest; a lion lives in a den.", topic: "Verbal Analogy" },
-    { q: "PEN : WRITE :: KNIFE : ?", opts: ["Sharp", "Cut", "Kitchen", "Blade"], ans: 1, exp: "A pen is used to write; a knife is used to cut.", topic: "Verbal Analogy" },
-    { q: "FISH : WATER :: BIRD : ?", opts: ["Nest", "Sky", "Tree", "Air"], ans: 3, exp: "A fish lives in water; a bird lives in air (flies in air).", topic: "Verbal Analogy" },
-    { q: "EYE : SEE :: EAR : ?", opts: ["Sound", "Listen", "Hear", "Noise"], ans: 2, exp: "An eye is used to see; an ear is used to hear.", topic: "Verbal Analogy" },
-    { q: "Series: 1, 4, 9, 16, 25, ?", opts: ["30", "35", "36", "49"], ans: 2, exp: "Perfect squares: 1, 4, 9, 16, 25, 36.", topic: "Number Series" },
-    { q: "Find the odd one out: Apple, Banana, Carrot, Mango", opts: ["Apple", "Banana", "Carrot", "Mango"], ans: 2, exp: "Carrot is a vegetable; others are fruits.", topic: "Classification" },
-    { q: "If 'FISH' is coded as 'EHRG', how is 'BIRD' coded?", opts: ["AHQC", "CJSE", "AHRD", "CHQC"], ans: 0, exp: "Each letter shifted -1: F->E, I->H, S->R, H->G. B->A, I->H, R->Q, D->C = AHQC.", topic: "Coding-Decoding" },
     { q: "A is taller than B. C is shorter than B. D is taller than A. Who is the shortest?", opts: ["A", "B", "C", "D"], ans: 2, exp: "Order: D > A > B > C. C is shortest.", topic: "Ordering" },
-    { q: "If all Zips are Zaps and some Zaps are Zops, which must be true?", opts: ["All Zips are Zops", "Some Zips may be Zops", "No Zips are Zops", "All Zops are Zips"], ans: 1, exp: "Since some Zaps are Zops and all Zips are Zaps, some Zips may be Zops but not necessarily.", topic: "Logic" },
-    { q: "Series: 2, 5, 10, 17, 26, ?", opts: ["35", "37", "39", "41"], ans: 1, exp: "Differences: 3,5,7,9,11. 26+11=37. Or n^2+1: 1+1, 4+1, 9+1, 16+1, 25+1, 36+1=37.", topic: "Number Series" },
     { q: "Find the odd one out: 2, 3, 5, 7, 9, 11", opts: ["2", "3", "9", "11"], ans: 2, exp: "9 = 3x3 is not prime; all others are prime numbers.", topic: "Classification" },
-    { q: "If NORTH is coded as 15-21-18-20-8, how is SOUTH coded?", opts: ["19-15-21-20-8", "19-14-21-20-8", "18-15-21-20-8", "19-15-20-21-8"], ans: 0, exp: "Each letter's position in alphabet: S=19, O=15, U=21, T=20, H=8.", topic: "Coding-Decoding" },
     { q: "Statement: All students who study hard pass the exam. Ali did not pass. Conclusion?", opts: ["Ali studied hard", "Ali did not study hard", "Ali is not a student", "Cannot determine"], ans: 1, exp: "If studying hard guarantees passing, and Ali didn't pass, he didn't study hard (contrapositive).", topic: "Logic" },
-    { q: "Complete: DOCTOR : HOSPITAL :: TEACHER : ?", opts: ["Student", "School", "Book", "Class"], ans: 1, exp: "A doctor works in a hospital; a teacher works in a school.", topic: "Verbal Analogy" },
+    { q: "Series: 2, 5, 10, 17, 26, ?", opts: ["35", "37", "39", "41"], ans: 1, exp: "Differences: 3,5,7,9,11. 26+11=37.", topic: "Number Series" },
+    { q: "FISH : WATER :: BIRD : ?", opts: ["Nest", "Sky", "Tree", "Air"], ans: 3, exp: "A fish lives in water; a bird lives in air (flies in air).", topic: "Verbal Analogy" },
+    { q: "Find the odd one out: Apple, Banana, Carrot, Mango", opts: ["Apple", "Banana", "Carrot", "Mango"], ans: 2, exp: "Carrot is a vegetable; others are fruits.", topic: "Classification" },
     { q: "If today is Wednesday, what day will it be 100 days from now?", opts: ["Monday", "Tuesday", "Wednesday", "Friday"], ans: 3, exp: "100 mod 7 = 2. Wednesday + 2 days = Friday.", topic: "Calendar" }
   ]
 };
 
-// Passage-based AR questions
 const PASSAGE_QUESTIONS = {
   passages: [
     {
       id: "passage_1",
       text: "Five friends - Ali, Bilal, Usman, Saad, and Hamza - are sitting in a row facing north. The following conditions apply:\n\n1. Ali sits to the immediate left of Bilal.\n2. Hamza sits to the right of Saad.\n3. Usman is not sitting at either end.\n4. Bilal sits next to Usman.\n5. Saad is not at the leftmost position.",
       questions: [
-        { q: "Based on the passage, who is sitting at the leftmost position?", opts: ["Ali", "Bilal", "Saad", "Hamza"], ans: 0, exp: "From conditions: Ali is left of Bilal, Bilal next to Usman, Usman not at end, Hamza right of Saad, Saad not leftmost. Arrangement: Ali, Bilal, Usman, Saad, Hamza. Ali is leftmost.", topic: "Seating Arrangement" },
+        { q: "Based on the passage, who is sitting at the leftmost position?", opts: ["Ali", "Bilal", "Saad", "Hamza"], ans: 0, exp: "Arrangement: Ali, Bilal, Usman, Saad, Hamza. Ali is leftmost.", topic: "Seating Arrangement" },
         { q: "Who is sitting in the middle position?", opts: ["Ali", "Bilal", "Usman", "Saad"], ans: 2, exp: "The arrangement is: Ali(1), Bilal(2), Usman(3), Saad(4), Hamza(5). Usman is in the middle.", topic: "Seating Arrangement" },
         { q: "Who sits to the immediate right of Usman?", opts: ["Bilal", "Saad", "Hamza", "Ali"], ans: 1, exp: "In the arrangement Ali-Bilal-Usman-Saad-Hamza, Saad sits to the immediate right of Usman.", topic: "Seating Arrangement" },
         { q: "If Hamza and Saad swap positions, who would be at the rightmost end?", opts: ["Hamza", "Saad", "Usman", "Bilal"], ans: 1, exp: "After swap: Ali-Bilal-Usman-Hamza-Saad. Saad would be at the rightmost end.", topic: "Seating Arrangement" }
@@ -774,21 +723,11 @@ const PASSAGE_QUESTIONS = {
     },
     {
       id: "passage_2",
-      text: "In a family of six members - P, Q, R, S, T, and U - the following relationships exist:\n\n1. P and Q are a married couple.\n2. R is the son of P.\n3. S is the daughter of Q.\n4. T is the brother of R.\n5. U is the grandmother of S.",
-      questions: [
-        { q: "How is T related to S?", opts: ["Brother", "Father", "Uncle", "Cousin"], ans: 0, exp: "T is brother of R, and R is son of P. S is daughter of Q (P's spouse). So T and S are siblings - T is S's brother.", topic: "Blood Relations" },
-        { q: "How many male members are in the family?", opts: ["2", "3", "4", "Cannot determine"], ans: 1, exp: "P (male, husband), R (male, son), T (male, brother of R) = 3 males. Q is female (wife), S is female (daughter). U's gender not specified but typically grandmother is female.", topic: "Blood Relations" },
-        { q: "Who is the father of T?", opts: ["P", "Q", "R", "Cannot determine"], ans: 0, exp: "T is brother of R. R is son of P. So P is the father of T.", topic: "Blood Relations" },
-        { q: "How is U related to P?", opts: ["Mother", "Mother-in-law", "Cannot determine", "Sister"], ans: 2, exp: "U is grandmother of S. S is daughter of P and Q. U could be P's mother or Q's mother. Cannot determine from given information.", topic: "Blood Relations" }
-      ]
-    },
-    {
-      id: "passage_3",
       text: "Six students - A, B, C, D, E, and F - scored different marks in a test. The following information is known:\n\n1. A scored more than B but less than C.\n2. D scored more than E but less than A.\n3. F scored the highest.\n4. B scored more than E.",
       questions: [
         { q: "Who scored the second highest marks?", opts: ["A", "B", "C", "D"], ans: 2, exp: "Order: F > C > A > D > B > E. C scored second highest.", topic: "Ordering" },
         { q: "Who scored the lowest marks?", opts: ["A", "B", "D", "E"], ans: 3, exp: "From the conditions: F > C > A > D > B > E. E scored the lowest.", topic: "Ordering" },
-        { q: "How many students scored more than D?", opts: ["2", "3", "4", "5"], ans: 1, exp: "F, C, and A scored more than D. That's 3 students.", topic: "Ordering" },
+        { q: "How many students scored more than D?", opts: ["2", "3", "4", "5"], ans: 1, exp: "F, C, and A scored more than D. That is 3 students.", topic: "Ordering" },
         { q: "If C and F swap scores, who would have the highest score?", opts: ["A", "C", "F", "D"], ans: 1, exp: "After swap, C would have F's original (highest) score. C would be highest.", topic: "Ordering" }
       ]
     }
@@ -797,187 +736,132 @@ const PASSAGE_QUESTIONS = {
 
 function generateFallbackQuestions(sectionKey, count, globalUsedSet, globalUsedList) {
   const pool = FALLBACK_QUESTIONS[sectionKey] || [];
-  const available = pool.filter(q => {
-    if (isDuplicate(q, globalUsedSet, globalUsedList)) return false;
-    return true;
-  });
-
-  let finalPool = available;
+  let available = pool.filter(q => !isDuplicate(q, globalUsedSet, globalUsedList));
   if (available.length < count) {
-    // Reset history for this section if pool exhausted
-    const h = DedupEngine.load();
-    delete h[sectionKey];
-    DedupEngine.save(h);
-    // Reload
+    const h = DedupEngine.load(); delete h[sectionKey]; DedupEngine.save(h);
     globalUsedSet = DedupEngine.getGlobalUsed();
-    globalUsedList = [];
-    finalPool = pool.filter(q => !isDuplicate(q, globalUsedSet, globalUsedList));
+    available = pool.filter(q => !isDuplicate(q, globalUsedSet, []));
   }
-
-  const shuffled = [...finalPool].sort(() => Math.random() - 0.5);
-  const selected = shuffled.slice(0, count);
-
-  return selected.map((item, i) => ({
+  const shuffled = [...available].sort(() => Math.random() - 0.5).slice(0, count);
+  return shuffled.map((item, i) => ({
     id: `${sectionKey}_fb_${i}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    question: item.q,
-    options: item.opts,
-    correctIndex: item.ans,
-    explanation: item.exp,
-    topic: item.topic,
-    difficulty: 'medium',
-    section: sectionKey,
-    weight: CONFIG.SECTIONS[sectionKey].weight,
-    isAI: false,
-    passageId: null
+    question: item.q, options: item.opts, correctIndex: item.ans,
+    explanation: item.exp, topic: item.topic, difficulty: 'medium',
+    section: sectionKey, weight: CONFIG.SECTIONS[sectionKey].weight,
+    isAI: false, passageId: null
   }));
 }
 
 function generatePassageQuestions(globalUsedSet, globalUsedList) {
   const passages = [...PASSAGE_QUESTIONS.passages].sort(() => Math.random() - 0.5);
-  const selectedPassages = passages.slice(0, 2); // 2 passages
+  const selectedPassages = passages.slice(0, 2);
   const allQuestions = [];
-
   selectedPassages.forEach(passage => {
-    const questions = [...passage.questions].sort(() => Math.random() - 0.5).slice(0, 3); // 3 questions per passage
+    const questions = [...passage.questions].sort(() => Math.random() - 0.5).slice(0, 3);
     questions.forEach((q, i) => {
       if (!isDuplicate(q, globalUsedSet, globalUsedList)) {
         allQuestions.push({
           id: `ar_pass_${passage.id}_${i}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-          question: q.q,
-          options: q.opts,
-          correctIndex: q.ans,
-          explanation: q.exp,
-          topic: q.topic,
-          difficulty: 'medium',
-          section: 'analytical',
-          weight: 2,
-          isAI: false,
-          passageId: passage.id,
-          passageText: passage.text
+          question: q.q, options: q.opts, correctIndex: q.ans,
+          explanation: q.exp, topic: q.topic, difficulty: 'medium',
+          section: 'analytical', weight: 2, isAI: false,
+          passageId: passage.id, passageText: passage.text
         });
       }
     });
   });
-
   return allQuestions;
 }
 
 // ==================== AI QUESTION GENERATION ====================
 async function generateSectionQuestions(sectionKey, count, globalUsedSet, globalUsedList) {
   const section = CONFIG.SECTIONS[sectionKey];
-  
-  // Enhanced prompt with stricter JSON enforcement
+
   const prompts = {
-    english: `Generate exactly ${count} original English MCQs for a Pakistani university admission test (NTS NAT STANDARD level).
+    english: `Generate exactly ${count} original English MCQs for a Pakistani university admission test (NTS NAT level).
 
 MIX THESE TOPICS:
-- Synonyms (advanced vocabulary - GRE/SAT level words)
-- Antonyms (advanced vocabulary - GRE/SAT level words)
-- Sentence correction (complex subject-verb agreement, tenses, articles, prepositions, parallelism)
-- Verbal analogies (A:B :: C:? with complex relationships)
-- Idioms and phrases (advanced usage)
-- Reading comprehension (dense passage with inference-based questions)
-- Grammar (advanced parts of speech, punctuation, sentence structure)
+- Synonyms (GRE/SAT level vocabulary)
+- Antonyms (GRE/SAT level vocabulary)
+- Sentence correction (subject-verb agreement, tenses, articles)
+- Verbal analogies (A:B :: C:?)
+- Idioms and phrases
+- Grammar (parts of speech, punctuation)
 
-Difficulty: HARD - Match NTS NAT difficulty. Include challenging vocabulary and complex sentence structures.
-Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
+Difficulty: HARD - challenging vocabulary, complex sentences.`,
 
-    gk: `Generate exactly ${count} original General Knowledge MCQs for a Pakistani university admission test (IMSciences/NTS NAT style).
+    gk: `Generate exactly ${count} original General Knowledge MCQs for a Pakistani university admission test (2024-2025 focus).
 
-MIX THESE TOPICS (must include recent/current topics):
-- Pakistan Affairs (current PM, budget, CPEC, recent developments)
-- Current Affairs (2023-2025 international events, conflicts, summits)
-- World Geography (capitals, landmarks, organizations)
-- Science (basic physics, chemistry, biology)
-- Islamic Studies (basic facts about Quran, Hadith, Islamic history)
+MIX THESE TOPICS:
+- Pakistan current affairs (PM, cabinet, budget, elections, CPEC)
+- International affairs (UN, OIC, SCO, world summits 2024-25)
+- Science (physics, chemistry, biology basics)
+- Islamic Studies (Quran, Islamic history)
 - Sports (Cricket World Cup, FIFA, Olympics, Pakistani athletes)
-- International Organizations (UN, OIC, WHO, WTO)
-- History (Pakistan movement, Mughal era, world history)
-- Business/Economics (banks, economic terms)
+- Pakistan history (independence movement, constitution)
+- World Geography (capitals, major rivers, organisations)
 
-Questions should feel RECENT and RELEVANT to a 2024-2025 admission test.
-Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
+Questions should be RELEVANT to a 2024-2025 admission test.`,
 
-    math: `Generate exactly ${count} original Mathematics MCQs for a Pakistani university admission test (NTS NAT STANDARD - HARD DIFFICULTY).
+    math: `Generate exactly ${count} original Mathematics MCQs for a Pakistani intermediate-level admission test.
 
 MIX THESE TOPICS:
 - Percentages and ratios
-- Algebra (linear equations, quadratic basics)
-- Geometry (area, volume, perimeter, angles)
-- Profit, loss, and discount
-- Work and time problems
-- Number series and sequences
+- Algebra (linear equations, substitution)
+- Geometry (area, volume, perimeter)
+- Profit, loss, discount
+- Work and time
 - HCF and LCM
 - Fractions and decimals
-- Simple and compound interest
-- Average and statistics
+- Simple interest
 - Word problems
+- Number series
 
-Difficulty: Intermediate (for intermediate/FSc level students)
-Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`,
+Difficulty: Intermediate (FSc level).`,
 
-    analytical: `Generate exactly ${count} original Analytical Reasoning MCQs for a Pakistani university admission test (IMSciences/NTS NAT style, slightly easier than NTS NAT).
+    analytical: `Generate exactly ${count} original Analytical Reasoning MCQs for a Pakistani university admission test.
 
-CRITICAL: DO NOT INCLUDE ANY MATHEMATICAL CALCULATION QUESTIONS. This is a REASONING section, not math.
+CRITICAL: DO NOT INCLUDE MATHEMATICAL CALCULATIONS. This is a PURE REASONING section.
 
 MIX THESE TOPICS:
 - Logical deductions and syllogisms
-- Seating arrangement puzzles
-- Family/blood relations
-- Coding-decoding (letter/word patterns)
-- Direction sense problems
+- Blood relations (family tree puzzles)
+- Coding-decoding (letter/word patterns, NO math)
+- Direction sense
 - Statement and conclusion
-- Cause and effect reasoning
-- Ordering and ranking problems
-- Pattern recognition (simple letter/number series - NO complex math)
+- Ordering and ranking
 - Classification (odd one out)
 - Verbal analogies (A:B :: C:?)
-- Word associations
+- Letter/number series (simple patterns)
 
-IMPORTANT RULES:
-- NO HCF, LCM, fractions, percentages, algebra, geometry, speed-distance, profit-loss
-- NO mathematical calculations beyond simple counting
-- Focus on LOGIC and REASONING only
-- Include at least 3-4 verbal analogy questions
-- Include at least 1-2 seating arrangement or ordering questions
-
-Return STRICT JSON ONLY. NO markdown. NO code blocks. NO explanations outside JSON.`
+FORBIDDEN: HCF, LCM, percentages, algebra, geometry, speed-distance, profit-loss.
+INCLUDE: At least 3 verbal analogy questions and 2 blood-relation questions.`
   };
 
-  const systemPrompt = `You are an expert CBT test question generator for Pakistani university admission tests (IMSciences Peshawar, NTS NAT style). Generate original multiple-choice questions.
+  // This systemPrompt is now ACTUALLY SENT to the backend (FIX #3)
+  const systemPrompt = `You are an expert MCQ generator for Pakistani university admission tests (IMSciences Peshawar / NTS NAT style).
 
-STRICT RULES:
-- Generate exam-style MCQs appropriate for intermediate/FSc level students
-- Slightly easier than NTS NAT standard
-- Do not copy from copyrighted sources
-- Each question must have exactly 4 options (A, B, C, D)
-- correctIndex must be 0, 1, 2, or 3
-- No empty question text or options
-- No duplicate options within a question
-- Provide a clear, educational explanation for each answer
-- Return STRICT JSON only - absolutely NO markdown, NO code fences (\`\`\`), NO extra text before or after JSON
-- Questions must be UNIQUE and not repeat common textbook questions
-- Do not use special characters that might break JSON (escape quotes properly)
-- Use simple ASCII characters where possible
+STRICT JSON OUTPUT RULES:
+- Output ONLY a valid JSON object
+- Start your response with { and end with }
+- No markdown, no code fences (no triple backticks), no text outside the JSON
+- Each question must have exactly: question (string), options (array of 4 strings), correctIndex (integer 0-3), explanation (string), topic (string), difficulty (string)
+- All 4 options must be distinct
+- correctIndex must be the index of the genuinely correct answer
 
-Your response must be ONLY this format:
-{"questions":[{"question":"text","options":["A","B","C","D"],"correctIndex":0,"explanation":"text","topic":"topic","difficulty":"easy"}]}`;
+Your response format:
+{"questions":[{"question":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"...","topic":"...","difficulty":"medium"}]}`;
 
   const userPrompt = `${prompts[sectionKey]}
 
-Generate exactly ${count} unique questions. Return ONLY valid JSON with no markdown formatting.`;
+Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON object — nothing else.`;
 
   try {
-    // FIXED: Call our own secure backend instead of OpenRouter directly
     const response = await fetch('/api/generate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        prompt: userPrompt,
-        section: sectionKey
-      })
+      headers: { 'Content-Type': 'application/json' },
+      // FIX #3: systemPrompt is now sent to the backend so it's actually used
+      body: JSON.stringify({ prompt: userPrompt, systemPrompt, section: sectionKey })
     });
 
     if (!response.ok) {
@@ -987,50 +871,33 @@ Generate exactly ${count} unique questions. Return ONLY valid JSON with no markd
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content || '';
+    if (!content.trim()) throw new Error('Empty response from AI');
 
-    if (!content.trim()) {
-      throw new Error('Empty response from API');
-    }
-
-    // Multi-stage cleaning and parsing
     content = cleanAIResponse(content);
-    
-    let parsed = parseJSONWithRecovery(content);
-    
-    if (!parsed || !parsed.questions || !Array.isArray(parsed.questions)) {
-      throw new Error('Invalid structure after parsing');
-    }
+    const parsed = parseJSONWithRecovery(content);
+
+    if (!parsed || !Array.isArray(parsed.questions)) throw new Error('Invalid JSON structure from AI');
 
     const validQuestions = [];
     const seenHashes = new Set();
 
     for (const q of parsed.questions) {
-      // Strict validation
       if (!validateQuestion(q)) continue;
-      
       const candidate = {
         question: q.question.trim(),
-        options: q.options.map(o => o.trim()),
+        options: q.options.map(o => String(o).trim()),
         correctIndex: q.correctIndex,
         explanation: q.explanation?.trim() || 'Explanation not provided.',
         topic: q.topic || section.name,
-        difficulty: ['easy', 'medium', 'hard'].includes(q.difficulty) ? q.difficulty : 'medium',
-        section: sectionKey,
-        weight: section.weight,
-        isAI: true,
-        passageId: null
+        difficulty: ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
+        section: sectionKey, weight: section.weight, isAI: true, passageId: null
       };
-
-      // Check for duplicates
       const hash = questionHash(candidate);
-      if (seenHashes.has(hash)) continue;
-      if (isDuplicate(candidate, globalUsedSet, globalUsedList)) continue;
-
+      if (seenHashes.has(hash) || isDuplicate(candidate, globalUsedSet, globalUsedList)) continue;
       seenHashes.add(hash);
       validQuestions.push(candidate);
       globalUsedSet.add(hash);
       globalUsedList.push(candidate);
-
       if (validQuestions.length >= count) break;
     }
 
@@ -1041,70 +908,65 @@ Generate exactly ${count} unique questions. Return ONLY valid JSON with no markd
   }
 }
 
-// Clean AI response - remove markdown, code fences, extra text
 function cleanAIResponse(content) {
-  // Remove markdown code fences
-  content = content.replace(/```json\s*/gi, '');
-  content = content.replace(/```\s*/gi, '');
-  content = content.replace(/```javascript\s*/gi, '');
-  
-  // Remove any leading/trailing whitespace
-  content = content.trim();
-  
-  // Extract JSON object if embedded in text
+  content = content.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
   const jsonMatch = content.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
-    return jsonMatch[0];
-  }
-  
-  return content;
+  return jsonMatch ? jsonMatch[0] : content;
 }
 
-// Parse JSON with multiple recovery strategies
+// ==================== FIX #1: REWRITTEN parseJSONWithRecovery ====================
+// The original Strategy 2 had a critical bug: it escaped ALL quotes including
+// structural JSON quotes, making the JSON completely invalid.
+// This version uses safe, targeted repair strategies instead.
 function parseJSONWithRecovery(content) {
-  // Strategy 1: Direct parse
+  // Strategy 1: Direct parse (works most of the time)
+  try { return JSON.parse(content); } catch {}
+
+  // Strategy 2: Isolate the first complete { ... } block
+  const s = content.indexOf('{');
+  const e = content.lastIndexOf('}');
+  if (s !== -1 && e > s) {
+    try { return JSON.parse(content.slice(s, e + 1)); } catch {}
+  }
+
+  // Strategy 3: Fix trailing commas (most common AI JSON error: {"a":1,})
   try {
-    return JSON.parse(content);
-  } catch (e) {}
-  
-  // Strategy 2: Fix common JSON errors
-  let fixed = content;
-  
-  // Fix unescaped quotes in strings
-  fixed = fixed.replace(/(?<!\\)"/g, '\\"');
-  
-  // Try to extract and parse again
-  const jsonMatch = fixed.match(/\{[\s\S]*\}/);
-  if (jsonMatch) {
+    const fixed = content.replace(/,(\s*[}\]])/g, '$1');
+    return JSON.parse(fixed);
+  } catch {}
+
+  // Strategy 4: Isolate block AND fix trailing commas
+  if (s !== -1 && e > s) {
     try {
-      return JSON.parse(jsonMatch[0]);
-    } catch (e) {}
+      const sliced = content.slice(s, e + 1).replace(/,(\s*[}\]])/g, '$1');
+      return JSON.parse(sliced);
+    } catch {}
   }
-  
-  // Strategy 3: Try to find array
-  const arrayMatch = fixed.match(/\[[\s\S]*\]/);
-  if (arrayMatch) {
+
+  // Strategy 5: Array format fallback
+  const a = content.indexOf('[');
+  const b = content.lastIndexOf(']');
+  if (a !== -1 && b > a) {
     try {
-      const arr = JSON.parse(arrayMatch[0]);
-      return { questions: arr };
-    } catch (e) {}
+      const arr = JSON.parse(content.slice(a, b + 1));
+      if (Array.isArray(arr)) return { questions: arr };
+    } catch {}
   }
-  
+
   return null;
 }
 
-// Validate question structure
 function validateQuestion(q) {
   if (!q || typeof q !== 'object') return false;
-  if (!q.question || q.question.trim().length < 5) return false;
+  if (!q.question || String(q.question).trim().length < 5) return false;
   if (!Array.isArray(q.options) || q.options.length !== 4) return false;
-  if (!q.options.every(o => o && typeof o === 'string' && o.trim().length > 0)) return false;
-  // Check for duplicate options
-  if (new Set(q.options.map(o => o.trim())).size !== 4) return false;
+  if (!q.options.every(o => o && String(o).trim().length > 0)) return false;
+  if (new Set(q.options.map(o => String(o).trim())).size !== 4) return false;
   if (typeof q.correctIndex !== 'number' || q.correctIndex < 0 || q.correctIndex > 3) return false;
-  if (!q.explanation || q.explanation.trim().length < 3) return false;
+  if (!q.explanation || String(q.explanation).trim().length < 3) return false;
   return true;
 }
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
@@ -1114,8 +976,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function applyTheme() {
   document.documentElement.setAttribute('data-theme', state.theme);
-  const icon = document.getElementById('themeIcon');
-  icon.className = state.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+  document.getElementById('themeIcon').className = state.theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
 }
 
 function toggleTheme() {
@@ -1134,7 +995,13 @@ function navigateTo(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==================== TEST FLOW (SEQUENTIAL SECTIONS, AUTO-CONTINUE) ====================
+// ==================== FIX #2: PARALLEL startMockTest ====================
+// Original: sequential for-loop over 4 sections, each waiting for the previous.
+// Total time = sum of all section times = could be 80-120s, all timing out.
+// Fixed: Promise.allSettled runs all 4 sections simultaneously.
+// Total time = time for slowest single section (~15-20s instead of 80-120s).
+// Each section asks for only 8 AI questions (not 20-30) to stay well under timeout.
+// Remaining questions are filled from the curated fallback bank.
 async function startMockTest() {
   const nameInput = document.getElementById('candidateName').value.trim();
   state.candidateName = nameInput.length > 0 ? nameInput : 'Practice Candidate';
@@ -1145,39 +1012,63 @@ async function startMockTest() {
   document.getElementById('headerCandidateId').textContent = state.candidateId;
 
   showLoading();
+  updateLoadingMessage('Sending requests to AI for all sections...');
+  updateProgress(10);
 
   const globalUsedSet = DedupEngine.getGlobalUsed();
   const globalUsedList = [];
+
+  // Mark all sections active at the same time (they run in parallel)
+  CONFIG.SECTION_ORDER.forEach(sk => updateSectionStatus(sk, 'active', 'Contacting AI...'));
+
+  // ---- PARALLEL: all 4 section API calls fire simultaneously ----
+  const parallelResults = await Promise.allSettled(
+    CONFIG.SECTION_ORDER.map(async (sectionKey) => {
+      let sectionQs = [];
+
+      // Analytical starts with passage questions (no API needed)
+      if (sectionKey === 'analytical') {
+        sectionQs = generatePassageQuestions(globalUsedSet, globalUsedList);
+      }
+
+      // Ask AI for 8 questions max (keeps each request fast, <15s)
+      const aiTarget = Math.min(8, CONFIG.SECTIONS[sectionKey].count - sectionQs.length);
+      if (aiTarget > 0) {
+        const aiQs = await generateSectionQuestions(sectionKey, aiTarget, globalUsedSet, globalUsedList);
+        sectionQs = [...sectionQs, ...aiQs];
+      }
+
+      return { sectionKey, questions: sectionQs };
+    })
+  );
+
+  updateProgress(70);
+  updateLoadingMessage('Filling remaining questions from question bank...');
+
+  // ---- Assemble: AI questions + fallback for remaining slots ----
   const allQuestions = [];
 
-  // Generate sections sequentially (to maintain order and share dedup)
-  for (const sectionKey of CONFIG.SECTION_ORDER) {
+  CONFIG.SECTION_ORDER.forEach((sectionKey, idx) => {
+    const result = parallelResults[idx];
+    let questions = (result.status === 'fulfilled' && result.value?.questions)
+      ? result.value.questions : [];
+
     const section = CONFIG.SECTIONS[sectionKey];
-    updateSectionStatus(sectionKey, 'active', 'Generating...');
 
-    let questions = [];
-
-    // For analytical: generate passage questions first
-    if (sectionKey === 'analytical') {
-      const passageQs = generatePassageQuestions(globalUsedSet, globalUsedList);
-      questions.push(...passageQs);
-    }
-
-    // AI generation
-    const aiCount = section.count - questions.length;
-    if (aiCount > 0) {
-      const aiQuestions = await generateSectionQuestions(sectionKey, aiCount, globalUsedSet, globalUsedList);
-      questions.push(...aiQuestions);
-    }
-
-    // Fallback for remaining
+    // Fallback fills any gap up to the required count
     if (questions.length < section.count) {
       const needed = section.count - questions.length;
-      const fallback = generateFallbackQuestions(sectionKey, needed, globalUsedSet, globalUsedList);
-      questions.push(...fallback);
+      const fallbackQs = generateFallbackQuestions(sectionKey, needed, globalUsedSet, globalUsedList);
+      questions = [...questions, ...fallbackQs];
     }
 
-    // Record used
+    // Ensure every question has a unique ID
+    questions = questions.map((q, i) => ({
+      ...q,
+      id: q.id || `${sectionKey}_${i}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+    }));
+
+    // Track for dedup
     questions.forEach(q => {
       const h = questionHash(q);
       globalUsedSet.add(h);
@@ -1188,18 +1079,15 @@ async function startMockTest() {
     questions.sort(() => Math.random() - 0.5);
     allQuestions.push(...questions);
 
-    updateSectionStatus(sectionKey, 'done', `${questions.length} questions ready`);
-  }
+    // Persist to dedup history
+    DedupEngine.recordUsed(sectionKey, questions.map(q => questionHash(q)));
 
-  // Record all to persistent history
-  CONFIG.SECTION_ORDER.forEach(sk => {
-    const sectionQs = allQuestions.filter(q => q.section === sk);
-    DedupEngine.recordUsed(sk, sectionQs.map(q => questionHash(q)));
+    const aiCount = questions.filter(q => q.isAI).length;
+    updateSectionStatus(sectionKey, 'done', `${questions.length} ready (${aiCount} AI)`);
   });
 
   updateLoadingMessage('Finalizing test...');
   updateProgress(100);
-
   await sleep(400);
   hideLoading();
 
@@ -1225,7 +1113,8 @@ async function startMockTest() {
   updateStats();
   renderNavigator();
 
-  showToast('Test started! 87 questions, 90 minutes.', 'success');
+  const aiTotal = allQuestions.filter(q => q.isAI).length;
+  showToast(`Test ready! ${aiTotal} AI questions + ${87 - aiTotal} from question bank.`, 'success');
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -1235,7 +1124,6 @@ function showLoading() {
   document.getElementById('loadingTitle').textContent = 'Generating Your Test';
   document.getElementById('loadingMessage').textContent = 'Creating fresh questions with AI...';
   document.getElementById('loadingProgressFill').style.width = '0%';
-
   const list = document.getElementById('sectionProgressList');
   list.innerHTML = '';
   CONFIG.SECTION_ORDER.forEach(sk => {
@@ -1243,14 +1131,9 @@ function showLoading() {
     const item = document.createElement('div');
     item.className = 'section-progress-item';
     item.id = 'sp-' + sk;
-    item.innerHTML = `
-      <div class="sp-icon"><i class="fa-regular fa-circle"></i></div>
-      <div class="sp-name">${section.name}</div>
-      <div class="sp-status">Waiting</div>
-    `;
+    item.innerHTML = `<div class="sp-icon"><i class="fa-regular fa-circle"></i></div><div class="sp-name">${section.name}</div><div class="sp-status">Waiting</div>`;
     list.appendChild(item);
   });
-
   document.getElementById('loadingOverlay').style.display = 'flex';
 }
 
@@ -1259,20 +1142,10 @@ function updateSectionStatus(sectionKey, status, text) {
   if (!item) return;
   const icon = item.querySelector('.sp-icon');
   const statusEl = item.querySelector('.sp-status');
-
   icon.className = 'sp-icon ' + status;
-  if (status === 'done') {
-    icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-  } else if (status === 'active') {
-    icon.innerHTML = '<i class="fa-solid fa-spinner"></i>';
-  }
+  if (status === 'done') icon.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
+  else if (status === 'active') icon.innerHTML = '<i class="fa-solid fa-spinner"></i>';
   statusEl.textContent = text;
-
-  const doneCount = document.querySelectorAll('.sp-icon.done').length;
-  const activeCount = document.querySelectorAll('.sp-icon.active').length;
-  const total = CONFIG.SECTION_ORDER.length;
-  const progress = ((doneCount + (activeCount > 0 ? 0.5 : 0)) / total) * 100;
-  updateProgress(progress);
 }
 
 function updateProgress(pct) {
@@ -1308,18 +1181,11 @@ function updateTimerDisplay() {
   const m = Math.floor((state.timeRemaining % 3600) / 60);
   const s = state.timeRemaining % 60;
   const display = document.getElementById('timerDisplay');
-  display.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-
+  display.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   if (state.timeRemaining <= 300) display.classList.add('timer-warning');
   else display.classList.remove('timer-warning');
-
-  const progress = (state.timeRemaining / CONFIG.TOTAL_TIME) * 100;
-  document.getElementById('timerProgress').style.width = progress + '%';
-
-  const totalH = Math.floor(CONFIG.TOTAL_TIME / 3600);
-  const totalM = Math.floor((CONFIG.TOTAL_TIME % 3600) / 60);
-  document.getElementById('timerTotal').textContent =
-    `${String(totalH).padStart(2, '0')}:${String(totalM).padStart(2, '0')}:00 total`;
+  document.getElementById('timerProgress').style.width = (state.timeRemaining / CONFIG.TOTAL_TIME * 100) + '%';
+  document.getElementById('timerTotal').textContent = '01:30:00 total';
 }
 
 function updatePace() {
@@ -1327,26 +1193,18 @@ function updatePace() {
   const expectedProgress = elapsed / CONFIG.TOTAL_TIME;
   const actualProgress = Object.keys(state.answers).length / state.test.totalQuestions;
   const ratio = actualProgress / (expectedProgress || 0.001);
-
   const paceText = document.getElementById('paceText');
   const paceBadge = document.getElementById('paceBadge');
   const paceDetail = document.getElementById('paceDetail');
-
   if (ratio < 0.7) {
-    paceText.textContent = 'Behind pace';
-    paceText.style.color = 'var(--accent-orange)';
-    paceBadge.className = 'pace-badge behind';
-    paceDetail.textContent = `${Math.round(ratio * 100)}% of expected - take your time, then pick up`;
+    paceText.textContent = 'Behind pace'; paceText.style.color = 'var(--accent-orange)';
+    paceBadge.className = 'pace-badge behind'; paceDetail.textContent = 'Pick up the speed';
   } else if (ratio > 1.3) {
-    paceText.textContent = 'Ahead of pace';
-    paceText.style.color = 'var(--accent-green)';
-    paceBadge.className = 'pace-badge ahead';
-    paceDetail.textContent = 'Great progress! Maintain quality';
+    paceText.textContent = 'Ahead of pace'; paceText.style.color = 'var(--accent-green)';
+    paceBadge.className = 'pace-badge ahead'; paceDetail.textContent = 'Great progress!';
   } else {
-    paceText.textContent = 'On track';
-    paceText.style.color = 'var(--accent-blue)';
-    paceBadge.className = 'pace-badge on-track';
-    paceDetail.textContent = 'Good pace';
+    paceText.textContent = 'On track'; paceText.style.color = 'var(--accent-blue)';
+    paceBadge.className = 'pace-badge on-track'; paceDetail.textContent = 'Good pace';
   }
 }
 
@@ -1354,7 +1212,6 @@ function updatePace() {
 function renderQuestion() {
   const test = state.test;
   if (!test) return;
-
   const q = test.questions[state.currentQuestionIndex];
   if (!q) return;
 
@@ -1362,36 +1219,25 @@ function renderQuestion() {
   document.getElementById('questionWeight').textContent = `Weight ${q.weight}`;
   document.getElementById('questionText').textContent = q.question;
 
-  // Section tag
   const section = CONFIG.SECTIONS[q.section];
   document.getElementById('sectionTag').innerHTML = `<i class="fa-solid ${section.icon}"></i> ${section.name}`;
   document.getElementById('breadcrumbSubject').textContent = section.name;
 
-  // Passage display
   const passageContainer = document.getElementById('passageContainer');
   if (q.passageId && q.passageText) {
-    passageContainer.innerHTML = `
-      <div class="passage-box">
-        <span class="passage-label"><i class="fa-solid fa-file-lines" style="margin-right:6px;"></i>Read the following passage carefully:</span>
-        ${q.passageText.replace(/\n/g, '<br>')}
-      </div>
-    `;
+    passageContainer.innerHTML = `<div class="passage-box"><span class="passage-label"><i class="fa-solid fa-file-lines" style="margin-right:6px;"></i>Read the following passage carefully:</span>${q.passageText.replace(/\n/g, '<br>')}</div>`;
   } else {
     passageContainer.innerHTML = '';
   }
 
   const optionsList = document.getElementById('optionsList');
   optionsList.innerHTML = '';
-
   const labels = ['A', 'B', 'C', 'D'];
   q.options.forEach((opt, idx) => {
     const item = document.createElement('div');
     item.className = 'option-item' + (state.answers[q.id] === idx ? ' selected' : '');
     item.onclick = () => selectOption(idx);
-    item.innerHTML = `
-      <div class="option-radio"></div>
-      <div class="option-text"><strong>${labels[idx]}.</strong>&nbsp;&nbsp;${opt}</div>
-    `;
+    item.innerHTML = `<div class="option-radio"></div><div class="option-text"><strong>${labels[idx]}.</strong>&nbsp;&nbsp;${opt}</div>`;
     optionsList.appendChild(item);
   });
 
@@ -1404,12 +1250,10 @@ function renderQuestion() {
   const markBtn = document.getElementById('markBtn');
   if (state.markedQuestions.has(q.id)) {
     markBtn.innerHTML = '<i class="fa-solid fa-bookmark"></i> Marked for Review';
-    markBtn.classList.remove('btn-outline');
-    markBtn.classList.add('btn-secondary');
+    markBtn.classList.remove('btn-outline'); markBtn.classList.add('btn-secondary');
   } else {
     markBtn.innerHTML = '<i class="fa-regular fa-bookmark"></i> Answer it Later';
-    markBtn.classList.add('btn-outline');
-    markBtn.classList.remove('btn-secondary');
+    markBtn.classList.add('btn-outline'); markBtn.classList.remove('btn-secondary');
   }
 
   updateStats();
@@ -1424,8 +1268,7 @@ function selectOption(idx) {
 }
 
 function nextQuestion() {
-  const test = state.test;
-  if (state.currentQuestionIndex < test.questions.length - 1) {
+  if (state.currentQuestionIndex < state.test.questions.length - 1) {
     state.currentQuestionIndex++;
     renderQuestion();
   } else {
@@ -1463,29 +1306,24 @@ function toggleMark() {
 function renderNavigator() {
   const nav = document.getElementById('questionNavigator');
   nav.innerHTML = '';
-
   state.test.questions.forEach((q, idx) => {
     const dot = document.createElement('div');
     dot.className = 'nav-dot';
     dot.textContent = idx + 1;
-
     const answered = state.answers[q.id] !== undefined;
     const marked = state.markedQuestions.has(q.id);
     const current = idx === state.currentQuestionIndex;
-
     if (current) dot.classList.add('current');
     if (answered && marked) dot.classList.add('answered-marked');
     else if (answered) dot.classList.add('answered');
     else if (marked) dot.classList.add('marked');
-
     dot.onclick = () => goToQuestion(idx);
     nav.appendChild(dot);
   });
 }
 
 function updateNavigatorHighlight() {
-  const dots = document.querySelectorAll('.nav-dot');
-  dots.forEach((dot, idx) => {
+  document.querySelectorAll('.nav-dot').forEach((dot, idx) => {
     dot.classList.toggle('current', idx === state.currentQuestionIndex);
   });
 }
@@ -1493,21 +1331,15 @@ function updateNavigatorHighlight() {
 function updateStats() {
   const test = state.test;
   if (!test) return;
-
   const answered = Object.keys(state.answers).length;
   const total = test.totalQuestions;
-  const saved = state.markedQuestions.size;
-
   document.getElementById('answeredCount').textContent = answered;
   document.getElementById('totalQuestions').textContent = total;
-  document.getElementById('savedCount').textContent = saved;
-
+  document.getElementById('savedCount').textContent = state.markedQuestions.size;
   const pct = Math.round((answered / total) * 100);
   document.getElementById('answeredProgress').style.width = pct + '%';
   document.getElementById('answeredPercent').textContent = pct + '% complete';
-
   document.getElementById('sectionProgressText').textContent = `${state.currentQuestionIndex + 1} of ${total}`;
-
   updatePace();
 }
 
@@ -1517,14 +1349,12 @@ function confirmSubmit() {
   const total = state.test.totalQuestions;
   const unattempted = total - answered;
   const marked = state.markedQuestions.size;
-
   document.getElementById('confirmTitle').textContent = 'Submit Test?';
   document.getElementById('confirmMessage').innerHTML =
     `You have answered <strong>${answered}</strong> out of <strong>${total}</strong> questions.` +
     (unattempted > 0 ? `<br>${unattempted} question(s) unattempted.` : '') +
     (marked > 0 ? `<br>${marked} question(s) marked for review.` : '') +
     `<br><br>You cannot change answers after submission.`;
-
   const actionBtn = document.getElementById('confirmAction');
   actionBtn.onclick = () => { closeConfirm(); submitTest(); };
   document.getElementById('confirmDialog').style.display = 'flex';
@@ -1536,10 +1366,8 @@ function closeConfirm() {
 
 function submitTest() {
   if (state.timer) clearInterval(state.timer);
-
   const test = state.test;
-  let correct = 0, wrong = 0, unattempted = 0;
-  let totalMarks = 0, obtainedMarks = 0;
+  let correct = 0, wrong = 0, unattempted = 0, totalMarks = 0, obtainedMarks = 0;
 
   test.questions.forEach(q => {
     const ans = state.answers[q.id];
@@ -1557,23 +1385,14 @@ function submitTest() {
 
   test.questions.forEach(q => {
     const ss = sectionStats[q.section];
-    ss.total++;
-    ss.marks += q.weight;
+    ss.total++; ss.marks += q.weight;
     const ans = state.answers[q.id];
     if (ans === undefined) ss.unattempted++;
     else if (ans === q.correctIndex) { ss.correct++; ss.obtained += q.weight; }
     else ss.wrong++;
   });
 
-  test.results = {
-    correct, wrong, unattempted, percentage, passed,
-    totalMarks, obtainedMarks,
-    endTime: new Date().toISOString(),
-    answers: { ...state.answers },
-    marked: [...state.markedQuestions],
-    sectionStats
-  };
-
+  test.results = { correct, wrong, unattempted, percentage, passed, totalMarks, obtainedMarks, endTime: new Date().toISOString(), answers: { ...state.answers }, marked: [...state.markedQuestions], sectionStats };
   navigateTo('results');
 }
 
@@ -1581,12 +1400,10 @@ function submitTest() {
 function renderResults() {
   const test = state.test;
   if (!test || !test.results) return;
-
   const r = test.results;
 
   document.getElementById('resultsCandidateInfo').textContent =
     `${test.candidateName} · ID ${test.candidateId} · ${new Date(test.startTime).toLocaleString()}`;
-
   document.getElementById('scorePercent').textContent = r.percentage + '%';
   document.getElementById('scoreMarks').textContent = `${r.obtainedMarks} / ${r.totalMarks} Marks`;
   document.getElementById('correctCount').textContent = r.correct;
@@ -1595,9 +1412,8 @@ function renderResults() {
   document.getElementById('percentageDisplay').textContent = r.percentage + '%';
 
   const circumference = 2 * Math.PI * 80;
-  const offset = circumference - (r.percentage / 100) * circumference;
   setTimeout(() => {
-    document.getElementById('scoreCircle').style.strokeDashoffset = offset;
+    document.getElementById('scoreCircle').style.strokeDashoffset = circumference - (r.percentage / 100) * circumference;
   }, 100);
 
   const statusEl = document.getElementById('passFailStatus');
@@ -1620,30 +1436,21 @@ function renderResults() {
     const pct = ss.marks > 0 ? Math.round((ss.obtained / ss.marks) * 100) : 0;
     const div = document.createElement('div');
     div.className = 'section-stat';
-    div.innerHTML = `
-      <div class="section-stat-name"><i class="fa-solid ${section.icon}" style="margin-right:6px;"></i>${section.name}</div>
-      <div class="section-stat-score">${pct}%</div>
-      <div class="section-stat-sub">${ss.correct}/${ss.total} · ${ss.obtained}/${ss.marks} marks</div>
-    `;
+    div.innerHTML = `<div class="section-stat-name"><i class="fa-solid ${section.icon}" style="margin-right:6px;"></i>${section.name}</div><div class="section-stat-score">${pct}%</div><div class="section-stat-sub">${ss.correct}/${ss.total} · ${ss.obtained}/${ss.marks} marks</div>`;
     breakdown.appendChild(div);
   });
 }
 
-function retakeTest() {
-  navigateTo('landing');
-}
+function retakeTest() { navigateTo('landing'); }
 
 // ==================== REVIEW ====================
 function renderReview() {
   const test = state.test;
   if (!test) return;
-
   const list = document.getElementById('reviewList');
   list.innerHTML = '';
-
   const labels = ['A', 'B', 'C', 'D'];
   let filteredQuestions = test.questions.map((q, idx) => ({ q, idx }));
-
   if (state.reviewFilter !== 'all') {
     filteredQuestions = filteredQuestions.filter(({ q }) => {
       const ans = state.answers[q.id];
@@ -1653,23 +1460,18 @@ function renderReview() {
       return true;
     });
   }
-
   if (filteredQuestions.length === 0) {
     list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fa-regular fa-folder-open" style="font-size:32px;margin-bottom:12px;display:block;"></i>No questions match this filter.</div>';
     return;
   }
-
   filteredQuestions.forEach(({ q, idx }) => {
     const userAns = state.answers[q.id];
     const isCorrect = userAns === q.correctIndex;
     const isUnattempted = userAns === undefined;
-
-    let statusClass = isUnattempted ? 'unattempted' : (isCorrect ? 'correct' : 'wrong');
-    let statusText = isUnattempted ? 'Unattempted' : (isCorrect ? 'Correct' : 'Wrong');
-    let statusIcon = isUnattempted ? 'fa-minus-circle' : (isCorrect ? 'fa-check-circle' : 'fa-times-circle');
-
+    const statusClass = isUnattempted ? 'unattempted' : (isCorrect ? 'correct' : 'wrong');
+    const statusText = isUnattempted ? 'Unattempted' : (isCorrect ? 'Correct' : 'Wrong');
+    const statusIcon = isUnattempted ? 'fa-minus-circle' : (isCorrect ? 'fa-check-circle' : 'fa-times-circle');
     const section = CONFIG.SECTIONS[q.section];
-
     const item = document.createElement('div');
     item.className = 'review-item';
     item.innerHTML = `
@@ -1681,29 +1483,20 @@ function renderReview() {
           <span style="color:var(--border-color);">·</span>
           <span>Weight ${q.weight}</span>
         </div>
-        <div class="review-status ${statusClass}">
-          <i class="fa-solid ${statusIcon}" style="margin-right:4px;"></i>${statusText}
-        </div>
+        <div class="review-status ${statusClass}"><i class="fa-solid ${statusIcon}" style="margin-right:4px;"></i>${statusText}</div>
       </div>
       <div class="review-body">
         <div class="review-question">${q.question}</div>
         <div class="review-options">
           ${q.options.map((opt, i) => {
-            let cls = '';
-            let icon = '';
+            let cls = '', icon = '';
             if (i === q.correctIndex && i === userAns) { cls = 'user-correct'; icon = '<i class="fa-solid fa-check opt-icon" style="color:var(--accent-green);"></i>'; }
             else if (i === q.correctIndex) { cls = 'correct-answer'; icon = '<i class="fa-solid fa-check opt-icon" style="color:var(--accent-green);"></i>'; }
             else if (i === userAns) { cls = 'user-selected'; icon = '<i class="fa-solid fa-xmark opt-icon" style="color:var(--accent-red);"></i>'; }
-            return `<div class="review-option ${cls}">
-              <span class="opt-label">${labels[i]}.</span>
-              <span>${opt}</span>
-              ${icon}
-            </div>`;
+            return `<div class="review-option ${cls}"><span class="opt-label">${labels[i]}.</span><span>${opt}</span>${icon}</div>`;
           }).join('')}
         </div>
-        <div class="review-explanation">
-          <strong><i class="fa-solid fa-lightbulb" style="margin-right:6px;color:var(--accent-blue);"></i>Explanation:</strong> ${q.explanation}
-        </div>
+        <div class="review-explanation"><strong><i class="fa-solid fa-lightbulb" style="margin-right:6px;color:var(--accent-blue);"></i>Explanation:</strong> ${q.explanation}</div>
       </div>
     `;
     list.appendChild(item);
@@ -1722,15 +1515,11 @@ function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
   toast.className = 'toast ' + type;
-
   const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
   toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i> ${message}`;
-
   container.appendChild(toast);
   setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(100%)';
-    toast.style.transition = 'all 0.3s';
+    toast.style.opacity = '0'; toast.style.transform = 'translateX(100%)'; toast.style.transition = 'all 0.3s';
     setTimeout(() => toast.remove(), 300);
   }, 3500);
 }
@@ -1741,18 +1530,13 @@ function confirmExitTest() {
   document.getElementById('confirmMessage').textContent = 'Your progress will be lost. Are you sure you want to exit?';
   const actionBtn = document.getElementById('confirmAction');
   actionBtn.textContent = 'Exit Test';
-  actionBtn.onclick = () => {
-    closeConfirm();
-    if (state.timer) clearInterval(state.timer);
-    navigateTo('landing');
-  };
+  actionBtn.onclick = () => { closeConfirm(); if (state.timer) clearInterval(state.timer); navigateTo('landing'); };
   document.getElementById('confirmDialog').style.display = 'flex';
 }
 
 document.addEventListener('keydown', (e) => {
   if (state.currentView !== 'test') return;
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-
   if (e.key >= '1' && e.key <= '4') selectOption(parseInt(e.key) - 1);
   else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); nextQuestion(); }
   else if (e.key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); }
@@ -1760,12 +1544,8 @@ document.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('beforeunload', (e) => {
-  if (state.currentView === 'test' && state.test) {
-    e.preventDefault();
-    e.returnValue = '';
-  }
+  if (state.currentView === 'test' && state.test) { e.preventDefault(); e.returnValue = ''; }
 });
 </script>
 </body>
 </html>
-
