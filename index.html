@@ -968,33 +968,21 @@ Your response must be ONLY this format:
 Generate exactly ${count} unique questions. Return ONLY valid JSON with no markdown formatting.`;
 
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 35000);
-
-    const response = await fetch(CONFIG.OPENROUTER.endpoint, {
+    // FIXED: Call our own secure backend instead of OpenRouter directly
+    const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${CONFIG.OPENROUTER.key}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': CONFIG.OPENROUTER.referer,
-        'X-Title': CONFIG.OPENROUTER.title
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: CONFIG.OPENROUTER.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        temperature: 0.7,
-        max_tokens: 5000
-      }),
-      signal: controller.signal
+        prompt: userPrompt,
+        section: sectionKey
+      })
     });
 
-    clearTimeout(timeoutId);
-
     if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || `Server error: ${response.status}`);
     }
 
     const data = await response.json();
@@ -1117,7 +1105,6 @@ function validateQuestion(q) {
   if (!q.explanation || q.explanation.trim().length < 3) return false;
   return true;
 }
-
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
   applyTheme();
