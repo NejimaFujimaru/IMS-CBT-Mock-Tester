@@ -503,13 +503,29 @@ const CONFIG = {
     math: { name: 'Mathematics', count: 30, weight: 1, icon: 'fa-calculator', order: 3 },
     analytical: { name: 'Analytical Reasoning', count: 17, weight: 2, icon: 'fa-brain', order: 4 }
   },
-  SECTION_ORDER: ['english', 'gk', 'math', 'analytical'],
-  OPENROUTER: {
-    endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-    model: 'openrouter/free',
-    key: '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',
-    referer: 'https://ims-cbt-mock-tester.vercel.app',
-    title: 'ASQScholar CBT Mock Test'
+    SECTION_ORDER: ['english', 'gk', 'math', 'analytical'],
+  
+  // Secure API Caller - Calls our own backend, not OpenRouter directly
+  async callSecureAI(prompt, section) {
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, section })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Generation failed');
+      }
+
+      const data = await response.json();
+      return data.choices?.[0]?.message?.content || '';
+      
+    } catch (error) {
+      console.error(`API Error for ${section}:`, error);
+      throw error;
+    }
   }
 };
 
