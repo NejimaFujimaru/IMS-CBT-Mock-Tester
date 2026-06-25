@@ -9,13 +9,10 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // hermes is FIRST — the only confirmed-working free model right now.
 // The others are backups in case it becomes unavailable later.
 const FREE_MODELS = [
-  'nousresearch/hermes-3-llama-3.1-405b:free',
-  'deepseek/deepseek-v3:free',
-  'deepseek/deepseek-r1:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'qwen/qwq-32b:free',
-  'mistralai/mistral-7b-instruct:free',
-  'google/gemma-2-9b-it:free',
+  
+  'meta-llama/llama-3.3-70b-instruct',
+  'qwen/qwen3-next-80b-a3b-instruct',
+  'google/gemma-4-26b-a4b-it',
 ];
 
 async function fetchWikipediaContext() {
