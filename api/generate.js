@@ -1,21 +1,21 @@
-// api/generate.js — Vercel Serverless (NOT Edge), maxDuration: 60s
-// KEY FIX: Tries 6 known free OpenRouter models in order.
-// If one returns 404 (unavailable), it moves to the next instantly.
-// If one returns 429 (rate limit), it waits 4s and retries once, then moves on.
+// api/generate.js — Vercel Serverless, maxDuration: 60s
+// CHANGES: hermes moved to position 1 (skip dead models instantly)
+//          429 retry increased to 3 attempts (5s → 8s → 12s backoff)
 
 export const config = { maxDuration: 60 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Ordered list of free models — deepseek is tried first as it's the most reliable.
-// Any model returning 404 is skipped in < 1 second. Add/remove as needed.
+// hermes is FIRST — the only confirmed-working free model right now.
+// The others are backups in case it becomes unavailable later.
 const FREE_MODELS = [
-  'deepseek/deepseek-chat:free',
+  'nousresearch/hermes-3-llama-3.1-405b:free',
+  'deepseek/deepseek-v3:free',
   'deepseek/deepseek-r1:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
   'qwen/qwq-32b:free',
   'mistralai/mistral-7b-instruct:free',
   'google/gemma-2-9b-it:free',
-  'nousresearch/hermes-3-llama-3.1-405b:free',
 ];
 
 async function fetchWikipediaContext() {
@@ -31,7 +31,7 @@ async function fetchWikipediaContext() {
         const data = await res.json();
         if (data.extract) summaries.push(data.extract.slice(0, 300));
       }
-    } catch { /* skip unavailable topics */ }
+    } catch { /* skip */ }
   }
   return summaries;
 }
@@ -48,33 +48,28 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY in Vercel settings' });
   }
 
-  // If user sets OPENROUTER_MODEL env var, try that model first
   const models = process.env.OPENROUTER_MODEL
     ? [process.env.OPENROUTER_MODEL, ...FREE_MODELS]
     : FREE_MODELS;
 
-  // Enrich GK prompts with free Wikipedia current affairs context
   let finalPrompt = basePrompt;
   if (section === 'gk') {
     const summaries = await fetchWikipediaContext();
     if (summaries.length > 0) {
-      finalPrompt +=
-        '\n\n[CURRENT AFFAIRS CONTEXT — use these to inspire 2-3 topical questions]:\n' +
-        summaries.join('\n').slice(0, 600);
+      finalPrompt += '\n\n[CURRENT AFFAIRS CONTEXT — use to inspire 2-3 topical questions]:\n'
+        + summaries.join('\n').slice(0, 600);
     }
   }
 
-  const systemMessage =
-    baseSystem ||
+  const systemMessage = baseSystem ||
     'Output ONLY a valid JSON object. No markdown. No code fences. Start with { and end with }.';
 
-  let lastError = 'All models failed';
+  let lastError = 'All models exhausted';
 
-  // Outer loop: try each free model in order
   for (const model of models) {
 
-    // Inner loop: retry once if rate-limited (429)
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    // Up to 3 retries per model for rate-limit (429) with increasing backoff
+    for (let attempt = 1; attempt <= 3; attempt++) {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 30000); // 30s per attempt
 
@@ -102,39 +97,39 @@ export default async function handler(req, res) {
         clearTimeout(timer);
 
         if (apiRes.status === 404) {
-          // This free model slot is unavailable — skip to next model instantly
-          lastError = `${model} not available for free (404)`;
-          break; // exits inner loop, tries next model
+          // Model unavailable for free — skip instantly, no delay
+          lastError = `${model}: not available for free (404)`;
+          break; // next model
         }
 
         if (apiRes.status === 429) {
-          // Rate limited — wait 4s then retry this same model once
-          lastError = `${model} rate limited (429)`;
-          if (attempt < 2) { await sleep(4000); continue; }
-          break; // give up on this model after one retry
+          // Rate limited — wait longer each attempt, then retry same model
+          const waits = [5000, 8000, 12000];
+          lastError = `${model}: rate limited (429), attempt ${attempt}`;
+          if (attempt < 3) { await sleep(waits[attempt - 1]); continue; }
+          break; // gave up on this model after 3 tries
         }
 
         if (!apiRes.ok) {
           const errText = await apiRes.text().catch(() => '');
-          lastError = `${model} HTTP ${apiRes.status}: ${errText.slice(0, 100)}`;
-          break; // try next model
+          lastError = `${model}: HTTP ${apiRes.status} — ${errText.slice(0, 100)}`;
+          break; // next model
         }
 
-        // SUCCESS — return the response
+        // SUCCESS
         const data = await apiRes.json();
         return res.status(200).json(data);
 
       } catch (err) {
         clearTimeout(timer);
         lastError = err.name === 'AbortError'
-          ? `${model} timed out after 30s`
-          : `${model} error: ${err.message}`;
-        break; // try next model on any exception
+          ? `${model}: timed out after 30s`
+          : `${model}: ${err.message}`;
+        break; // next model
       }
     }
-    // continue to next model in outer loop
+    // continue outer loop to next model
   }
 
-  // Every model failed — client will use fallback question bank
   return res.status(503).json({ error: `AI unavailable: ${lastError}` });
 }

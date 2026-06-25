@@ -995,13 +995,11 @@ function navigateTo(view) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// ==================== FIX #2: PARALLEL startMockTest ====================
-// Original: sequential for-loop over 4 sections, each waiting for the previous.
-// Total time = sum of all section times = could be 80-120s, all timing out.
-// Fixed: Promise.allSettled runs all 4 sections simultaneously.
-// Total time = time for slowest single section (~15-20s instead of 80-120s).
-// Each section asks for only 8 AI questions (not 20-30) to stay well under timeout.
-// Remaining questions are filled from the curated fallback bank.
+// ============================================================
+// REPLACE the entire startMockTest() function in index.html
+// with this version. Sequential (not parallel) to avoid
+// hitting the rate limit with 4 simultaneous API calls.
+// ============================================================
 async function startMockTest() {
   const nameInput = document.getElementById('candidateName').value.trim();
   state.candidateName = nameInput.length > 0 ? nameInput : 'Practice Candidate';
@@ -1012,83 +1010,73 @@ async function startMockTest() {
   document.getElementById('headerCandidateId').textContent = state.candidateId;
 
   showLoading();
-  updateLoadingMessage('Sending requests to AI for all sections...');
-  updateProgress(10);
+  updateLoadingMessage('Generating questions — please wait (~40 seconds)...');
+  updateProgress(5);
 
   const globalUsedSet = DedupEngine.getGlobalUsed();
   const globalUsedList = [];
-
-  // Mark all sections active at the same time (they run in parallel)
-  CONFIG.SECTION_ORDER.forEach(sk => updateSectionStatus(sk, 'active', 'Contacting AI...'));
-
-  // ---- PARALLEL: all 4 section API calls fire simultaneously ----
-  const parallelResults = await Promise.allSettled(
-    CONFIG.SECTION_ORDER.map(async (sectionKey) => {
-      let sectionQs = [];
-
-      // Analytical starts with passage questions (no API needed)
-      if (sectionKey === 'analytical') {
-        sectionQs = generatePassageQuestions(globalUsedSet, globalUsedList);
-      }
-
-      // Ask AI for 8 questions max (keeps each request fast, <15s)
-      const aiTarget = Math.min(8, CONFIG.SECTIONS[sectionKey].count - sectionQs.length);
-      if (aiTarget > 0) {
-        const aiQs = await generateSectionQuestions(sectionKey, aiTarget, globalUsedSet, globalUsedList);
-        sectionQs = [...sectionQs, ...aiQs];
-      }
-
-      return { sectionKey, questions: sectionQs };
-    })
-  );
-
-  updateProgress(70);
-  updateLoadingMessage('Filling remaining questions from question bank...');
-
-  // ---- Assemble: AI questions + fallback for remaining slots ----
   const allQuestions = [];
 
-  CONFIG.SECTION_ORDER.forEach((sectionKey, idx) => {
-    const result = parallelResults[idx];
-    let questions = (result.status === 'fulfilled' && result.value?.questions)
-      ? result.value.questions : [];
-
+  // SEQUENTIAL — one section at a time so we never send 4 concurrent
+  // requests to the same rate-limited free model.
+  for (let i = 0; i < CONFIG.SECTION_ORDER.length; i++) {
+    const sectionKey = CONFIG.SECTION_ORDER[i];
     const section = CONFIG.SECTIONS[sectionKey];
 
-    // Fallback fills any gap up to the required count
-    if (questions.length < section.count) {
-      const needed = section.count - questions.length;
-      const fallbackQs = generateFallbackQuestions(sectionKey, needed, globalUsedSet, globalUsedList);
-      questions = [...questions, ...fallbackQs];
+    updateSectionStatus(sectionKey, 'active', 'Generating...');
+
+    let sectionQs = [];
+
+    // Analytical: passage questions need no API call
+    if (sectionKey === 'analytical') {
+      sectionQs = generatePassageQuestions(globalUsedSet, globalUsedList);
     }
 
-    // Ensure every question has a unique ID
-    questions = questions.map((q, i) => ({
+    // Ask AI for 5 questions max (small batch = faster response from free model)
+    const aiTarget = Math.min(5, section.count - sectionQs.length);
+    if (aiTarget > 0) {
+      const aiQs = await generateSectionQuestions(
+        sectionKey, aiTarget, globalUsedSet, globalUsedList
+      );
+      sectionQs = [...sectionQs, ...aiQs];
+    }
+
+    // Fallback bank fills the remaining slots
+    if (sectionQs.length < section.count) {
+      const needed = section.count - sectionQs.length;
+      sectionQs = [
+        ...sectionQs,
+        ...generateFallbackQuestions(sectionKey, needed, globalUsedSet, globalUsedList)
+      ];
+    }
+
+    // Ensure every question has an ID
+    sectionQs = sectionQs.map((q, idx) => ({
       ...q,
-      id: q.id || `${sectionKey}_${i}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
+      id: q.id || `${sectionKey}_${idx}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`
     }));
 
     // Track for dedup
-    questions.forEach(q => {
-      const h = questionHash(q);
-      globalUsedSet.add(h);
+    sectionQs.forEach(q => {
+      globalUsedSet.add(questionHash(q));
       globalUsedList.push(q);
     });
 
-    // Shuffle within section
-    questions.sort(() => Math.random() - 0.5);
-    allQuestions.push(...questions);
+    sectionQs.sort(() => Math.random() - 0.5);
+    allQuestions.push(...sectionQs);
+    DedupEngine.recordUsed(sectionKey, sectionQs.map(q => questionHash(q)));
 
-    // Persist to dedup history
-    DedupEngine.recordUsed(sectionKey, questions.map(q => questionHash(q)));
+    const aiCount = sectionQs.filter(q => q.isAI).length;
+    updateSectionStatus(sectionKey, 'done', `${sectionQs.length} ready (${aiCount} AI)`);
+    updateProgress(20 + 20 * (i + 1));
 
-    const aiCount = questions.filter(q => q.isAI).length;
-    updateSectionStatus(sectionKey, 'done', `${questions.length} ready (${aiCount} AI)`);
-  });
+    // 2-second pause between sections — keeps OpenRouter happy
+    if (i < CONFIG.SECTION_ORDER.length - 1) await sleep(2000);
+  }
 
   updateLoadingMessage('Finalizing test...');
   updateProgress(100);
-  await sleep(400);
+  await sleep(300);
   hideLoading();
 
   state.test = {
@@ -1114,7 +1102,7 @@ async function startMockTest() {
   renderNavigator();
 
   const aiTotal = allQuestions.filter(q => q.isAI).length;
-  showToast(`Test ready! ${aiTotal} AI questions + ${87 - aiTotal} from question bank.`, 'success');
+  showToast(`Test ready! ${aiTotal} AI + ${87 - aiTotal} from question bank.`, 'success');
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
