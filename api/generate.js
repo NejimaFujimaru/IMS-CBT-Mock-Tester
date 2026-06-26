@@ -9,7 +9,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // hermes is FIRST — the only confirmed-working free model right now.
 // The others are backups in case it becomes unavailable later.
 const FREE_MODELS = [
-  'openrouter/free'
+  'openai/gpt-oss-120b:free'
   // 'meta-llama/llama-3.3-70b-instruct',
   // 'qwen/qwen3-next-80b-a3b-instruct',
   // 'google/gemma-4-26b-a4b-it',
