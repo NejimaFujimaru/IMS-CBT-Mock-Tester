@@ -1,0 +1,147 @@
+[
+  {
+    "id": "gk_1",
+    "question": "What is the capital city of Pakistan?",
+    "options": ["Lahore", "Karachi", "Islamabad", "Peshawar"],
+    "answer": 2,
+    "explanation": "Islamabad became the capital of Pakistan in 1967, replacing Karachi."
+  },
+  {
+    "id": "gk_2",
+    "question": "Who was the founder of Pakistan?",
+    "options": ["Allama Iqbal", "Quaid-e-Azam Muhammad Ali Jinnah", "Liaquat Ali Khan", "Sir Syed Ahmed Khan"],
+    "answer": 1,
+    "explanation": "Muhammad Ali Jinnah is known as Quaid-e-Azam and founded Pakistan in 1947."
+  },
+  {
+    "id": "gk_3",
+    "question": "What is the national language of Pakistan?",
+    "options": ["Punjabi", "Sindhi", "Urdu", "Pashto"],
+    "answer": 2,
+    "explanation": "Urdu is the national language of Pakistan, serving as a lingua franca."
+  },
+  {
+    "id": "gk_4",
+    "question": "Which mountain range separates Pakistan from China?",
+    "options": ["Himalayas", "Karakoram", "Hindu Kush", "Sulaiman"],
+    "answer": 1,
+    "explanation": "The Karakoram range forms the border between Pakistan and China."
+  },
+  {
+    "id": "gk_5",
+    "question": "What is the largest province of Pakistan by area?",
+    "options": ["Punjab", "Sindh", "Khyber Pakhtunkhwa", "Balochistan"],
+    "answer": 3,
+    "explanation": "Balochistan is the largest province by area, covering about 44% of Pakistan's total land."
+  },
+  {
+    "id": "gk_6",
+    "question": "When did Pakistan become a nuclear power?",
+    "options": ["1996", "1998", "2000", "1995"],
+    "answer": 1,
+    "explanation": "Pakistan conducted nuclear tests on May 28, 1998 (Youm-e-Takbir)."
+  },
+  {
+    "id": "gk_7",
+    "question": "What is the currency of Pakistan?",
+    "options": ["Taka", "Rupee", "Dollar", "Riyal"],
+    "answer": 1,
+    "explanation": "The Pakistani Rupee (PKR) is the official currency."
+  },
+  {
+    "id": "gk_8",
+    "question": "Which river is the longest in Pakistan?",
+    "options": ["Sutlej", "Ravi", "Indus", "Chenab"],
+    "answer": 2,
+    "explanation": "The Indus River is the longest river in Pakistan, flowing approximately 3,180 km."
+  },
+  {
+    "id": "gk_9",
+    "question": "What is the national flower of Pakistan?",
+    "options": ["Rose", "Jasmine", "Sunflower", "Tulip"],
+    "answer": 1,
+    "explanation": "Jasmine (Chambeli) is the national flower of Pakistan."
+  },
+  {
+    "id": "gk_10",
+    "question": "Which organization did Pakistan join in 1950?",
+    "options": ["UNESCO", "WHO", "Colombo Plan", "NATO"],
+    "answer": 2,
+    "explanation": "Pakistan joined the Colombo Plan in 1950 for economic development cooperation."
+  },
+  {
+    "id": "gk_11",
+    "question": "What is the highest peak in Pakistan?",
+    "options": ["Nanga Parbat", "K2", "Broad Peak", "Gasherbrum I"],
+    "answer": 1,
+    "explanation": "K2 (8,611m) is the highest peak in Pakistan and second highest in the world."
+  },
+  {
+    "id": "gk_12",
+    "question": "Which city is known as the 'City of Lights' in Pakistan?",
+    "options": ["Lahore", "Islamabad", "Karachi", "Multan"],
+    "answer": 2,
+    "explanation": "Karachi is called the 'City of Lights' due to its vibrant nightlife and business activity."
+  },
+  {
+    "id": "gk_13",
+    "question": "What is the national animal of Pakistan?",
+    "options": ["Lion", "Markhor", "Snow Leopard", "Tiger"],
+    "answer": 1,
+    "explanation": "The Markhor is the national animal of Pakistan."
+  },
+  {
+    "id": "gk_14",
+    "question": "Which pass connects Pakistan with Afghanistan?",
+    "options": ["Khunjerab Pass", "Khyber Pass", "Lowari Pass", "Babusar Pass"],
+    "answer": 1,
+    "explanation": "The Khyber Pass has historically connected Pakistan with Afghanistan."
+  },
+  {
+    "id": "gk_15",
+    "question": "What is the population rank of Pakistan in the world (2024)?",
+    "options": ["3rd", "4th", "5th", "6th"],
+    "answer": 2,
+    "explanation": "Pakistan is approximately the 5th most populous country in the world."
+  },
+  {
+    "id": "gk_16",
+    "question": "Which treaty divided the Indus waters between India and Pakistan?",
+    "options": ["Simla Agreement", "Indus Waters Treaty", "Tashkent Declaration", "Lahore Declaration"],
+    "answer": 1,
+    "explanation": "The Indus Waters Treaty (1960) was brokered by the World Bank."
+  },
+  {
+    "id": "gk_17",
+    "question": "What is the national sport of Pakistan?",
+    "options": ["Cricket", "Field Hockey", "Football", "Squash"],
+    "answer": 1,
+    "explanation": "Field Hockey is the national sport of Pakistan."
+  },
+  {
+    "id": "gk_18",
+    "question": "Which Pakistani city is famous for its blue pottery?",
+    "options": ["Lahore", "Multan", "Peshawar", "Quetta"],
+    "answer": 1,
+    "explanation": "Multan is renowned for its traditional blue pottery craft."
+  },
+  {
+    "id": "gk_19",
+    "question": "What does CPEC stand for?",
+    "options": [
+      "China Pakistan Economic Corridor",
+      "Central Pakistan Energy Company",
+      "China Punjab Economic Council",
+      "Coastal Pakistan Export Channel"
+    ],
+    "answer": 0,
+    "explanation": "CPEC stands for China Pakistan Economic Corridor, a major infrastructure project."
+  },
+  {
+    "id": "gk_20",
+    "question": "Which international organization has its regional headquarters in Islamabad?",
+    "options": ["SAARC", "ECO", "SCO", "OIC"],
+    "answer": 1,
+    "explanation": "The Economic Cooperation Organization (ECO) has its secretariat in Tehran, but Pakistan is a key member. SCO held summits in Pakistan recently."
+  }
+]

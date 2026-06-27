@@ -1,0 +1,212 @@
+[
+  {
+    "id": "math_1",
+    "question": "If 2x + 5 = 15, what is the value of x?",
+    "options": ["5", "10", "7.5", "2.5"],
+    "answer": 0,
+    "explanation": "2x = 15 - 5 = 10, so x = 10/2 = 5"
+  },
+  {
+    "id": "math_2",
+    "question": "What is 15% of 200?",
+    "options": ["20", "25", "30", "35"],
+    "answer": 2,
+    "explanation": "15% of 200 = (15/100) × 200 = 30"
+  },
+  {
+    "id": "math_3",
+    "question": "Simplify: √144",
+    "options": ["10", "11", "12", "14"],
+    "answer": 2,
+    "explanation": "√144 = 12 because 12 × 12 = 144"
+  },
+  {
+    "id": "math_4",
+    "question": "If a car travels 180 km in 3 hours, what is its average speed?",
+    "options": ["50 km/h", "60 km/h", "70 km/h", "80 km/h"],
+    "answer": 1,
+    "explanation": "Speed = Distance/Time = 180/3 = 60 km/h"
+  },
+  {
+    "id": "math_5",
+    "question": "What is the next number in the sequence: 2, 4, 8, 16, ...?",
+    "options": ["24", "30", "32", "64"],
+    "answer": 2,
+    "explanation": "Each number is multiplied by 2, so 16 × 2 = 32"
+  },
+  {
+    "id": "math_6",
+    "question": "If 3/4 of a number is 60, what is the number?",
+    "options": ["60", "70", "80", "90"],
+    "answer": 2,
+    "explanation": "Let the number be x. (3/4)x = 60, so x = 60 × 4/3 = 80"
+  },
+  {
+    "id": "math_7",
+    "question": "What is the area of a rectangle with length 12 cm and width 5 cm?",
+    "options": ["17 cm²", "34 cm²", "60 cm²", "120 cm²"],
+    "answer": 2,
+    "explanation": "Area = length × width = 12 × 5 = 60 cm²"
+  },
+  {
+    "id": "math_8",
+    "question": "Solve: 5² - 3²",
+    "options": ["8", "16", "24", "32"],
+    "answer": 1,
+    "explanation": "5² - 3² = 25 - 9 = 16 (or use difference of squares: (5+3)(5-3) = 8×2 = 16)"
+  },
+  {
+    "id": "math_9",
+    "question": "What is the value of π (pi) approximately?",
+    "options": ["3.14", "3.41", "3.12", "3.24"],
+    "answer": 0,
+    "explanation": "π is approximately 3.14159..."
+  },
+  {
+    "id": "math_10",
+    "question": "If x + y = 10 and x - y = 4, what is the value of x?",
+    "options": ["5", "6", "7", "8"],
+    "answer": 2,
+    "explanation": "Adding equations: 2x = 14, so x = 7"
+  },
+  {
+    "id": "math_11",
+    "question": "What is 2³ × 2²?",
+    "options": ["2⁵", "2⁶", "4⁵", "4⁶"],
+    "answer": 0,
+    "explanation": "When multiplying powers with same base, add exponents: 2³⁺² = 2⁵"
+  },
+  {
+    "id": "math_12",
+    "question": "A shirt costs Rs. 800 after a 20% discount. What was the original price?",
+    "options": ["Rs. 900", "Rs. 950", "Rs. 1000", "Rs. 1200"],
+    "answer": 2,
+    "explanation": "If 80% of original = 800, then original = 800/0.8 = 1000"
+  },
+  {
+    "id": "math_13",
+    "question": "What is the perimeter of a square with side 7 cm?",
+    "options": ["14 cm", "21 cm", "28 cm", "49 cm"],
+    "answer": 2,
+    "explanation": "Perimeter = 4 × side = 4 × 7 = 28 cm"
+  },
+  {
+    "id": "math_14",
+    "question": "If 5 workers can complete a job in 12 days, how many days will 10 workers take?",
+    "options": ["4 days", "6 days", "8 days", "10 days"],
+    "answer": 1,
+    "explanation": "Inverse proportion: 5×12 = 10×d, so d = 60/10 = 6 days"
+  },
+  {
+    "id": "math_15",
+    "question": "What is the sum of angles in a triangle?",
+    "options": ["90°", "180°", "270°", "360°"],
+    "answer": 1,
+    "explanation": "The sum of interior angles in any triangle is always 180°"
+  },
+  {
+    "id": "math_16",
+    "question": "Convert 0.75 to a fraction in simplest form.",
+    "options": ["1/4", "3/4", "2/3", "4/5"],
+    "answer": 1,
+    "explanation": "0.75 = 75/100 = 3/4"
+  },
+  {
+    "id": "math_17",
+    "question": "What is the LCM of 6 and 8?",
+    "options": ["12", "16", "24", "48"],
+    "answer": 2,
+    "explanation": "Multiples of 6: 6,12,18,24...; Multiples of 8: 8,16,24... LCM = 24"
+  },
+  {
+    "id": "math_18",
+    "question": "If a:b = 2:3 and b:c = 4:5, find a:b:c",
+    "options": ["2:3:5", "8:12:15", "2:4:5", "6:9:15"],
+    "answer": 1,
+    "explanation": "Make b common: a:b = 8:12 and b:c = 12:15, so a:b:c = 8:12:15"
+  },
+  {
+    "id": "math_19",
+    "question": "What is the volume of a cube with side 3 cm?",
+    "options": ["9 cm³", "18 cm³", "27 cm³", "81 cm³"],
+    "answer": 2,
+    "explanation": "Volume = side³ = 3³ = 27 cm³"
+  },
+  {
+    "id": "math_20",
+    "question": "Solve for x: x/3 + 2 = 6",
+    "options": ["8", "10", "12", "15"],
+    "answer": 2,
+    "explanation": "x/3 = 6 - 2 = 4, so x = 4 × 3 = 12"
+  },
+  {
+    "id": "math_21",
+    "question": "What is 1/2 + 1/3?",
+    "options": ["2/5", "5/6", "3/5", "1/6"],
+    "answer": 1,
+    "explanation": "LCM of 2,3 is 6: (3+2)/6 = 5/6"
+  },
+  {
+    "id": "math_22",
+    "question": "If the circumference of a circle is 44 cm, what is its radius? (π = 22/7)",
+    "options": ["5 cm", "6 cm", "7 cm", "8 cm"],
+    "answer": 2,
+    "explanation": "C = 2πr, so 44 = 2 × 22/7 × r, r = 44 × 7 / 44 = 7 cm"
+  },
+  {
+    "id": "math_23",
+    "question": "What is the HCF of 24 and 36?",
+    "options": ["6", "8", "12", "18"],
+    "answer": 2,
+    "explanation": "Factors of 24: 1,2,3,4,6,8,12,24; Factors of 36: 1,2,3,4,6,9,12,18,36. HCF = 12"
+  },
+  {
+    "id": "math_24",
+    "question": "A train covers 240 km in 4 hours. How far will it travel in 7 hours at the same speed?",
+    "options": ["360 km", "400 km", "420 km", "480 km"],
+    "answer": 2,
+    "explanation": "Speed = 240/4 = 60 km/h. Distance in 7 hours = 60 × 7 = 420 km"
+  },
+  {
+    "id": "math_25",
+    "question": "What is the value of (-3)²?",
+    "options": ["-9", "9", "-6", "6"],
+    "answer": 1,
+    "explanation": "(-3)² = (-3) × (-3) = 9"
+  },
+  {
+    "id": "math_26",
+    "question": "If 20% of a number is 40, what is 50% of that number?",
+    "options": ["80", "90", "100", "120"],
+    "answer": 2,
+    "explanation": "If 20% = 40, then 100% = 200. So 50% = 100"
+  },
+  {
+    "id": "math_27",
+    "question": "What is the slope of the line passing through points (2,3) and (4,7)?",
+    "options": ["1", "2", "3", "4"],
+    "answer": 1,
+    "explanation": "Slope = (y₂-y₁)/(x₂-x₁) = (7-3)/(4-2) = 4/2 = 2"
+  },
+  {
+    "id": "math_28",
+    "question": "Simplify: (a+b)² - (a-b)²",
+    "options": ["2ab", "4ab", "a²+b²", "2a²+2b²"],
+    "answer": 1,
+    "explanation": "(a²+2ab+b²) - (a²-2ab+b²) = 4ab"
+  },
+  {
+    "id": "math_29",
+    "question": "What is the probability of getting a head when tossing a fair coin?",
+    "options": ["0", "1/4", "1/2", "1"],
+    "answer": 2,
+    "explanation": "There are 2 equally likely outcomes (H or T), so P(H) = 1/2"
+  },
+  {
+    "id": "math_30",
+    "question": "If the mean of 5 numbers is 20, what is their sum?",
+    "options": ["80", "90", "100", "110"],
+    "answer": 2,
+    "explanation": "Mean = Sum/Count, so Sum = Mean × Count = 20 × 5 = 100"
+  }
+]

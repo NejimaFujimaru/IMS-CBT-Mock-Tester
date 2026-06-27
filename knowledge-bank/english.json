@@ -1,0 +1,157 @@
+[
+  {
+    "id": "eng_1",
+    "question": "Choose the correct synonym of 'CANDID':",
+    "options": ["Vague", "Frank", "Secretive", "Deceptive"],
+    "answer": 1,
+    "explanation": "'Candid' means truthful and straightforward, which is synonymous with 'Frank'."
+  },
+  {
+    "id": "eng_2",
+    "question": "Identify the antonym of 'ZENITH':",
+    "options": ["Summit", "Peak", "Nadir", "Apex"],
+    "answer": 2,
+    "explanation": "'Zenith' means the highest point, while 'Nadir' means the lowest point."
+  },
+  {
+    "id": "eng_3",
+    "question": "Complete the analogy: DOCTOR : HOSPITAL :: TEACHER : ?",
+    "options": ["Student", "School", "Book", "Class"],
+    "answer": 1,
+    "explanation": "A doctor works in a hospital; similarly, a teacher works in a school."
+  },
+  {
+    "id": "eng_4",
+    "question": "Choose the correctly spelled word:",
+    "options": ["Embarassment", "Embarrassment", "Embarrasment", "Embarasment"],
+    "answer": 1,
+    "explanation": "The correct spelling is 'Embarrassment' (double r, double s)."
+  },
+  {
+    "id": "eng_5",
+    "question": "Select the meaning of the idiom 'To beat around the bush':",
+    "options": ["To hide in bushes", "To avoid the main topic", "To search carefully", "To plant trees"],
+    "answer": 1,
+    "explanation": "This idiom means to avoid addressing the main issue directly."
+  },
+  {
+    "id": "eng_6",
+    "question": "Fill in the blank: He was _____ by the beauty of the Taj Mahal.",
+    "options": ["mesmerized", "criticized", "terrorized", "ostracized"],
+    "answer": 0,
+    "explanation": "'Mesmerized' means deeply fascinated or captivated."
+  },
+  {
+    "id": "eng_7",
+    "question": "Which word is a noun?",
+    "options": ["Quickly", "Beautiful", "Happiness", "Run"],
+    "answer": 2,
+    "explanation": "'Happiness' is an abstract noun representing a state of being."
+  },
+  {
+    "id": "eng_8",
+    "question": "Choose the correct preposition: She is good _____ mathematics.",
+    "options": ["in", "at", "on", "with"],
+    "answer": 1,
+    "explanation": "The correct phrase is 'good at' when referring to skills or subjects."
+  },
+  {
+    "id": "eng_9",
+    "question": "What is the plural of 'Phenomenon'?",
+    "options": ["Phenomenons", "Phenomena", "Phenomenae", "Phenomeni"],
+    "answer": 1,
+    "explanation": "'Phenomena' is the Greek-derived plural of 'Phenomenon'."
+  },
+  {
+    "id": "eng_10",
+    "question": "Select the synonym of 'MITIGATE':",
+    "options": ["Aggravate", "Alleviate", "Intensify", "Provoke"],
+    "answer": 1,
+    "explanation": "'Mitigate' means to make less severe, similar to 'Alleviate'."
+  },
+  {
+    "id": "eng_11",
+    "question": "Identify the part of speech of 'UNDER' in: 'The cat is under the table.'",
+    "options": ["Adverb", "Preposition", "Conjunction", "Adjective"],
+    "answer": 1,
+    "explanation": "'Under' shows the relationship between the cat and the table, making it a preposition."
+  },
+  {
+    "id": "eng_12",
+    "question": "Choose the correct sentence:",
+    "options": [
+      "Neither of the boys are present.",
+      "Neither of the boys is present.",
+      "Neither of the boys were present.",
+      "Neither of the boys have been present."
+    ],
+    "answer": 1,
+    "explanation": "'Neither' is singular and takes a singular verb ('is')."
+  },
+  {
+    "id": "eng_13",
+    "question": "What does 'Benevolent' mean?",
+    "options": ["Cruel", "Kind", "Indifferent", "Angry"],
+    "answer": 1,
+    "explanation": "'Benevolent' means well-meaning and kindly."
+  },
+  {
+    "id": "eng_14",
+    "question": "Complete the sentence: If I _____ you, I would accept the offer.",
+    "options": ["was", "were", "am", "have been"],
+    "answer": 1,
+    "explanation": "In subjunctive mood for hypothetical situations, 'were' is used for all persons."
+  },
+  {
+    "id": "eng_15",
+    "question": "Which word is closest in meaning to 'EPHEMERAL'?",
+    "options": ["Permanent", "Transient", "Eternal", "Stable"],
+    "answer": 1,
+    "explanation": "'Ephemeral' means lasting for a very short time, similar to 'Transient'."
+  },
+  {
+    "id": "eng_16",
+    "question": "Choose the correct indirect speech: He said, 'I am tired.'",
+    "options": [
+      "He said that he is tired.",
+      "He said that he was tired.",
+      "He says that he was tired.",
+      "He said that I am tired."
+    ],
+    "answer": 1,
+    "explanation": "In indirect speech, present tense changes to past tense ('am' becomes 'was')."
+  },
+  {
+    "id": "eng_17",
+    "question": "What is the opposite of 'ANCIENT'?",
+    "options": ["Old", "Modern", "Historic", "Antique"],
+    "answer": 1,
+    "explanation": "'Modern' is the direct opposite of 'Ancient'."
+  },
+  {
+    "id": "eng_18",
+    "question": "Fill in the blank: The committee _____ divided in their opinions.",
+    "options": ["was", "were", "is", "has"],
+    "answer": 1,
+    "explanation": "When emphasizing individual members' differences, 'committee' takes a plural verb."
+  },
+  {
+    "id": "eng_19",
+    "question": "Select the correctly punctuated sentence:",
+    "options": [
+      "Its a beautiful day.",
+      "It's a beautiful day.",
+      "Its' a beautiful day.",
+      "It's a beautiful day"
+    ],
+    "answer": 1,
+    "explanation": "'It's' is the contraction for 'It is'. A period is needed at the end."
+  },
+  {
+    "id": "eng_20",
+    "question": "What is the meaning of 'Pragmatic'?",
+    "options": ["Idealistic", "Practical", "Dreamy", "Unrealistic"],
+    "answer": 1,
+    "explanation": "'Pragmatic' means dealing with things sensibly and practically."
+  }
+]
