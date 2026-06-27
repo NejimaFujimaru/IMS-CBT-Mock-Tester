@@ -243,8 +243,10 @@ function expandSidebar() {
 function showTestUI() {
   const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
   const headerSubmitBtn = document.getElementById('headerSubmitBtn');
+  const headerSubmitBtnTest = document.getElementById('headerSubmitBtnTest');
   if (sidebarToggleBtn) sidebarToggleBtn.style.display = 'flex';
-  if (headerSubmitBtn) headerSubmitBtn.style.display = 'flex';
+  if (headerSubmitBtn) headerSubmitBtn.style.display = 'none'; // Hide old button in main header
+  if (headerSubmitBtnTest) headerSubmitBtnTest.style.display = 'flex'; // Show button in sub-header next to timer
 }
 
 // ==================== QUESTION NAVIGATION ====================
@@ -451,8 +453,11 @@ async function generateSectionQuestions(section, count, existingQuestions) {
       
     } catch (e) {
       console.warn(`Attempt ${attempt + 1} failed for ${section}:`, e.message);
+      // Show toast on every attempt failure during generation phase
+      const retryMsg = attempt < maxAttempts - 1 ? ' Retrying...' : '';
+      Toast.error(`AI generation attempt ${attempt + 1}/${maxAttempts} failed: ${e.message}.${retryMsg}`);
       if (attempt === maxAttempts - 1) {
-        Toast.error(`AI generation failed for ${CONFIG.SECTIONS[section].name}. Using fallback questions.`);
+        Toast.warning(`AI generation failed for ${CONFIG.SECTIONS[section].name}. Using fallback questions from Knowledge Bank.`);
       }
     }
   }
@@ -536,9 +541,11 @@ async function startMockTest() {
   const loadingProgressFill = document.getElementById('loadingProgressFill');
   const sectionProgressList = document.getElementById('sectionProgressList');
   const loadingMessage = document.getElementById('loadingMessage');
+  const loadingRetryMessage = document.getElementById('loadingRetryMessage');
   
   loadingOverlay.style.display = 'flex';
   loadingMessage.textContent = 'Generating fresh questions with AI...';
+  loadingRetryMessage.textContent = '';
   
   state.test = { questions: [] };
   state.answers = {};
@@ -573,8 +580,10 @@ async function startMockTest() {
     loadingProgressFill.style.width = `${(completedSections / totalSections) * 100}%`;
     
     if (progressItem) {
+      const aiCount = questions.filter(q => q.aiGenerated).length;
+      const fallbackCount = questions.length - aiCount;
       progressItem.className = 'section-progress-item done';
-      progressItem.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${questions.length} ${CONFIG.SECTIONS[section].name} questions ready</span>`;
+      progressItem.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${questions.length} ${CONFIG.SECTIONS[section].name} questions ready (${aiCount} AI Generated${fallbackCount > 0 ? `, ${fallbackCount} from bank` : ''})</span>`;
     }
   }
   
@@ -590,6 +599,7 @@ async function startMockTest() {
   renderQuestion(0);
   updateNavigator();
   updateStats();
+  showTestUI();
   
   // Start background timer
   BackgroundTimer.start(CONFIG.TOTAL_TIME, updateTimerDisplay, () => {
