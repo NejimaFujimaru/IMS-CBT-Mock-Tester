@@ -1,26 +1,22 @@
 // api/generate.js — Vercel Serverless, maxDuration: 60s
-// Production-ready with robust retry logic for openrouter:auto (best free model)
-// Generates ALL questions via AI with real-time Wikipedia context for GK
+// BATCH generation (10 at a time) for maximum reliability with openrouter:auto
+// Automatically handles model rate limits by routing to available free models
 
 export const config = { maxDuration: 60 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Use openrouter:auto which routes to the best available free model
-// This automatically handles cases where specific models hit daily limits
 const FREE_MODEL = 'openrouter/auto';
+const BATCH_SIZE = 10;
 
 const RETRY_CONFIG = {
-  maxRetries: 4,              // Total attempts: 1 initial + 3 retries
-  baseDelay: 3000,            // Start at 3s
-  maxDelay: 15000,            // Cap at 15s
-  timeoutPerAttempt: 45000,   // 45s per attempt (longer for full question sets)
-  exponentialBase: 2.2        // Exponential backoff multiplier
+  maxRetries: 3,
+  baseDelay: 2000,
+  maxDelay: 10000,
+  timeoutPerAttempt: 30000,
+  exponentialBase: 2.2
 };
 
-/**
- * Fetches real-time context from Wikipedia for Pakistan Affairs and Current Events
- */
 async function fetchWikipediaContext() {
   const topics = [
     'Pakistan_in_2025',
@@ -28,15 +24,20 @@ async function fetchWikipediaContext() {
     'Pakistan_general_election,_2024',
     'Foreign_relations_of_Pakistan',
     'Economy_of_Pakistan',
-    'Current_events'
+    'Current_events',
+    'Islamabad',
+    'Karachi',
+    'Lahore'
   ];
   
   const summaries = [];
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), 8000);
   
   try {
-    for (const topic of topics) {
+    const shuffled = topics.sort(() => 0.5 - Math.random()).slice(0, 4);
+    
+    for (const topic of shuffled) {
       try {
         const res = await fetch(
           `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`,
@@ -48,10 +49,10 @@ async function fetchWikipediaContext() {
         if (res.ok) {
           const data = await res.json();
           if (data.extract) {
-            summaries.push(`${topic.replace(/_/g, ' ')}: ${data.extract.slice(0, 400)}`);
+            summaries.push(`${topic.replace(/_/g, ' ')}: ${data.extract.slice(0, 500)}`);
           }
         }
-      } catch { /* skip silently */ }
+      } catch { /* skip */ }
     }
   } finally {
     clearTimeout(timeout);
@@ -67,45 +68,154 @@ function calculateBackoff(attempt) {
 }
 
 function isRetryableError(status) {
-  // 429: Rate limit, 502/503/504: Server errors, 408: Request timeout
   return [408, 429, 502, 503, 504].includes(status);
 }
 
-/**
- * Advanced JSON cleaning with multiple recovery strategies
- */
 function cleanAIResponse(content) {
   if (!content || typeof content !== 'string') return null;
   
   let jsonStr = content.trim();
-  
-  // Strategy 1: Remove markdown code fences
   jsonStr = jsonStr.replace(/```json\s*/gi, '').replace(/```\s*/gi, '');
   jsonStr = jsonStr.replace(/```javascript\s*/gi, '').replace(/```\s*/gi, '');
   
-  // Strategy 2: Extract JSON array/object if surrounded by text
   const arrayMatch = jsonStr.match(/\[[\s\S]*\]/);
-  const objectMatch = jsonStr.match(/\{[\s\S]*\}/);
+  if (arrayMatch) jsonStr = arrayMatch[0];
   
-  if (arrayMatch) {
-    jsonStr = arrayMatch[0];
-  } else if (objectMatch) {
-    jsonStr = objectMatch[0];
-  }
-  
-  // Strategy 3: Fix trailing commas (common AI mistake)
   jsonStr = jsonStr.replace(/,\s*([\]}])/g, '$1');
-  
-  // Strategy 4: Fix unescaped quotes within strings (basic heuristic)
-  // This is risky but necessary for fragile models
-  
-  // Strategy 5: Remove any leading/trailing non-JSON characters
   jsonStr = jsonStr.replace(/^[^{[]*/, '').replace(/[^}\]]*$/, '');
-  
-  // Strategy 6: Ensure proper escaping of backslashes
   jsonStr = jsonStr.replace(/\\'/g, "'").replace(/\\"/g, '"');
   
   return jsonStr.trim();
+}
+
+async function generateBatch(batchCount, section, wikiContext) {
+  let contextAddition = '';
+  if (wikiContext && wikiContext.length > 0) {
+    contextAddition = '\n\n=== CURRENT AFFAIRS CONTEXT ===\n' +
+      wikiContext.join('\n\n').slice(0, 2000) +
+      '\n=== END CONTEXT ===\n' +
+      '\nFocus: Pakistan National Affairs, International Relations (UN, OIC, SCO), ' +
+      'Major Cities, Economic Developments, Political Landscape 2024-2025, CPEC, Kashmir.';
+  }
+
+  const prompt = `Generate EXACTLY ${batchCount} multiple-choice questions for "${section}".
+Format: JSON array only. NO markdown. NO code fences.
+Structure: [{"question":"...","options":["A)","B)","C)","D)"],"answer":"Correct Option","explanation":"..."}]
+${contextAddition}
+Rules:
+1. Output ONLY the JSON array starting with [ and ending with ].
+2. Each question must have exactly 4 options.
+3. Answer must match one option text exactly.
+4. For GK: Use 30-40% questions from Current Affairs context above.`;
+
+  const systemMessage = 'You are an expert exam generator. Output ONLY valid JSON arrays. No explanations outside JSON.';
+
+  let lastError = 'All attempts exhausted';
+  
+  for (let attempt = 0; attempt < RETRY_CONFIG.maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), RETRY_CONFIG.timeoutPerAttempt);
+
+    try {
+      const apiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://ims-cbt-mock-tester.vercel.app',
+          'X-Title': 'ASQScholar CBT Mock Test',
+          'OpenRouter-Force-Parse': 'true',
+        },
+        body: JSON.stringify({
+          model: FREE_MODEL,
+          messages: [
+            { role: 'system', content: systemMessage },
+            { role: 'user', content: prompt },
+          ],
+          temperature: 0.7,
+          max_tokens: 3000,
+          response_format: { type: 'json_object' },
+        }),
+      });
+
+      clearTimeout(timer);
+
+      if (apiRes.status === 404) {
+        lastError = `Model routing failed (404)`;
+        if (attempt < RETRY_CONFIG.maxRetries - 1) {
+          await sleep(calculateBackoff(attempt));
+          continue;
+        }
+        break;
+      }
+
+      if (apiRes.status === 401 || apiRes.status === 403) {
+        throw new Error(`Authentication failed (${apiRes.status})`);
+      }
+
+      if (isRetryableError(apiRes.status)) {
+        if (attempt < RETRY_CONFIG.maxRetries - 1) {
+          await sleep(calculateBackoff(attempt));
+          continue;
+        }
+        lastError = `Server error ${apiRes.status}`;
+        break;
+      }
+
+      if (apiRes.status >= 400) {
+        const errText = await apiRes.text().catch(() => '');
+        throw new Error(`HTTP ${apiRes.status}: ${errText.slice(0, 100)}`);
+      }
+
+      const data = await apiRes.json();
+      const content = data.choices?.[0]?.message?.content;
+      
+      if (!content) throw new Error('Empty response');
+
+      const cleanedJson = cleanAIResponse(content);
+      if (!cleanedJson) throw new Error('Failed to extract JSON');
+
+      let parsedQuestions;
+      try {
+        parsedQuestions = JSON.parse(cleanedJson);
+      } catch (parseErr) {
+        throw new Error(`JSON parse failed: ${parseErr.message}`);
+      }
+
+      if (!Array.isArray(parsedQuestions)) {
+        if (parsedQuestions.questions && Array.isArray(parsedQuestions.questions)) {
+          parsedQuestions = parsedQuestions.questions;
+        } else {
+          throw new Error('Response is not a JSON array');
+        }
+      }
+
+      const validQuestions = parsedQuestions.filter(q => 
+        q.question && 
+        Array.isArray(q.options) && 
+        q.options.length === 4 && 
+        q.answer
+      );
+
+      if (validQuestions.length === 0) {
+        throw new Error('No valid questions in batch');
+      }
+
+      return { success: true, questions: validQuestions };
+
+    } catch (err) {
+      clearTimeout(timer);
+      lastError = err.message;
+      
+      if (attempt < RETRY_CONFIG.maxRetries - 1) {
+        await sleep(calculateBackoff(attempt));
+        continue;
+      }
+    }
+  }
+
+  return { success: false, error: lastError, questions: [] };
 }
 
 export default async function handler(req, res) {
@@ -120,205 +230,52 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Missing OPENROUTER_API_KEY in Vercel settings' });
   }
 
-  // Fetch real-time context for GK section
-  let contextAddition = '';
+  let wikiContext = null;
   if (section === 'gk' || section === 'GK' || section === 'General Knowledge') {
-    const summaries = await fetchWikipediaContext();
-    if (summaries.length > 0) {
-      contextAddition = '\n\n=== CURRENT AFFAIRS CONTEXT (USE FOR 30-40% OF QUESTIONS) ===\n' +
-        summaries.join('\n\n').slice(0, 1500) +
-        '\n=== END CONTEXT ===\n' +
-        '\nFocus areas: Pakistan National Affairs, International Relations (UN, OIC, SCO), ' +
-        'Major Cities, Economic Developments, Political Landscape 2024-2025, CPEC, Kashmir Issue.';
+    wikiContext = await fetchWikipediaContext();
+  }
+
+  const allQuestions = [];
+  let totalAiGenerated = 0;
+  let remaining = parseInt(count) || 20;
+  let generationFailed = false;
+
+  while (remaining > 0 && !generationFailed) {
+    const batchSize = Math.min(BATCH_SIZE, remaining);
+    
+    console.log(`[Batch] Generating ${batchSize} questions for ${section}, ${remaining} remaining`);
+    
+    const result = await generateBatch(batchSize, section, wikiContext);
+    
+    if (result.success && result.questions.length > 0) {
+      allQuestions.push(...result.questions);
+      const actualCount = result.questions.length;
+      totalAiGenerated += actualCount;
+      remaining -= actualCount;
+      console.log(`[Batch] Success: got ${actualCount} questions, ${remaining} remaining`);
+    } else {
+      console.warn(`[Batch] Failed: ${result.error}`);
+      generationFailed = true;
     }
   }
 
-  // Build enhanced prompt requesting ALL questions
-  const finalPrompt = `${basePrompt}${contextAddition}\n\n` +
-    `CRITICAL REQUIREMENTS:\n` +
-    `1. Generate EXACTLY ${count || 20} complete MCQs (not 5, not 10, but ${count || 20}).\n` +
-    `2. Output ONLY a valid JSON array starting with [ and ending with ].\n` +
-    `3. NO markdown, NO code fences, NO explanatory text outside JSON.\n` +
-    `4. Each question must have: question, options (array of 4), answer (exact option text), explanation.\n` +
-    `5. For GK: Include 6-8 questions from the Current Affairs context above.\n` +
-    `6. Ensure variety in difficulty and topics.\n\n` +
-    `Example format:\n` +
-    `[{"question":"What...","options":["A)","B)","C)","D)"],"answer":"A)","explanation":"..."}]`;
-
-  const systemMessage = baseSystem ||
-    'You are an expert exam question generator for Pakistani University Entry Tests. ' +
-    'Output ONLY a valid JSON array. No markdown. No code fences. Start with [ and end with ].';
-
-  let lastError = 'All attempts exhausted';
-  let totalAttempts = 0;
-  let successData = null;
-
-  // Retry loop with exponential backoff on the SAME model (openrouter/auto)
-  while (totalAttempts < RETRY_CONFIG.maxRetries) {
-    const attemptNumber = totalAttempts + 1;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), RETRY_CONFIG.timeoutPerAttempt);
-
-    try {
-      const apiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        signal: controller.signal,
-        headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://ims-cbt-mock-tester.vercel.app',
-          'X-Title': 'ASQScholar CBT Mock Test',
-          'OpenRouter-Force-Parse': 'true',
-        },
-        body: JSON.stringify({
-          model: FREE_MODEL,
-          messages: [
-            { role: 'system', content: systemMessage },
-            { role: 'user', content: finalPrompt },
-          ],
-          temperature: 0.7,
-          max_tokens: 6000, // Increased for full question sets (20+ questions)
-          response_format: { type: 'json_object' },
-        }),
-      });
-
-      clearTimeout(timer);
-
-      // Model not available (404) - retry (auto should route to available model)
-      if (apiRes.status === 404) {
-        lastError = `Model routing failed (404), retrying... (attempt ${attemptNumber}/${RETRY_CONFIG.maxRetries})`;
-        console.warn(`[OpenRouter] ${lastError}`);
-        
-        if (totalAttempts < RETRY_CONFIG.maxRetries - 1) {
-          const waitTime = calculateBackoff(totalAttempts);
-          await sleep(waitTime);
-          totalAttempts++;
-          continue;
-        }
-        break;
-      }
-
-      // Authentication/authorization errors - don't retry
-      if (apiRes.status === 401 || apiRes.status === 403) {
-        lastError = `Authentication failed (${apiRes.status})`;
-        return res.status(500).json({ error: 'Invalid API key or unauthorized' });
-      }
-
-      // Rate limited or server error - retry with backoff
-      if (isRetryableError(apiRes.status)) {
-        const waitTime = calculateBackoff(totalAttempts);
-        lastError = `${apiRes.status} (attempt ${attemptNumber}/${RETRY_CONFIG.maxRetries}), waiting ${Math.round(waitTime/1000)}s`;
-        console.warn(`[OpenRouter] ${lastError}`);
-        
-        if (totalAttempts < RETRY_CONFIG.maxRetries - 1) {
-          await sleep(waitTime);
-          totalAttempts++;
-          continue;
-        }
-        break; // Exhausted retries
-      }
-
-      // Other client errors - don't retry
-      if (apiRes.status >= 400 && apiRes.status < 500) {
-        const errText = await apiRes.text().catch(() => '');
-        lastError = `HTTP ${apiRes.status} — ${errText.slice(0, 150)}`;
-        break;
-      }
-
-      // SUCCESS
-      const data = await apiRes.json();
-      
-      // Validate response structure
-      if (!data.choices || !Array.isArray(data.choices) || data.choices.length === 0) {
-        throw new Error('Invalid response structure from OpenRouter');
-      }
-      
-      const content = data.choices[0]?.message?.content;
-      if (!content || content.trim().length === 0) {
-        throw new Error('Empty content from AI');
-      }
-
-      // Clean and parse JSON
-      const cleanedJson = cleanAIResponse(content);
-      if (!cleanedJson) {
-        throw new Error('Failed to extract JSON from response');
-      }
-
-      let parsedQuestions;
-      try {
-        parsedQuestions = JSON.parse(cleanedJson);
-      } catch (parseErr) {
-        console.error('JSON Parse Error:', parseErr.message);
-        console.error('Cleaned JSON preview:', cleanedJson.slice(0, 500));
-        throw new Error(`JSON parse failed: ${parseErr.message}`);
-      }
-
-      // Validate it's an array
-      if (!Array.isArray(parsedQuestions)) {
-        // If it's an object with a questions property, extract it
-        if (parsedQuestions.questions && Array.isArray(parsedQuestions.questions)) {
-          parsedQuestions = parsedQuestions.questions;
-        } else if (parsedQuestions.data && Array.isArray(parsedQuestions.data)) {
-          parsedQuestions = parsedQuestions.data;
-        } else {
-          throw new Error('Response is not a JSON array');
-        }
-      }
-
-      // Verify we got enough questions
-      const expectedCount = parseInt(count) || 20;
-      if (parsedQuestions.length < expectedCount * 0.8) {
-        console.warn(`Only got ${parsedQuestions.length}/${expectedCount} questions, but accepting partial result`);
-      }
-
-      successData = { 
-        questions: parsedQuestions, 
-        source: 'AI',
-        model: FREE_MODEL,
-        attempts: totalAttempts + 1
-      };
-      
-      break; // Success! Exit retry loop
-
-    } catch (err) {
-      clearTimeout(timer);
-      
-      // Network errors are retryable
-      if (err.name === 'TypeError' || err.message.includes('network') || err.message.includes('fetch')) {
-        lastError = `Network error (attempt ${attemptNumber})`;
-        console.warn(`[OpenRouter] ${lastError}`);
-        
-        if (totalAttempts < RETRY_CONFIG.maxRetries - 1) {
-          const waitTime = calculateBackoff(totalAttempts);
-          await sleep(waitTime);
-          totalAttempts++;
-          continue;
-        }
-      }
-      
-      lastError = err.name === 'AbortError'
-        ? `Timed out after ${RETRY_CONFIG.timeoutPerAttempt/1000}s`
-        : err.message;
-      
-      if (totalAttempts < RETRY_CONFIG.maxRetries - 1) {
-        const waitTime = calculateBackoff(totalAttempts);
-        await sleep(waitTime);
-        totalAttempts++;
-        continue;
-      }
-      break;
-    }
+  if (allQuestions.length > 0) {
+    console.log(`[OpenRouter] Generated ${totalAiGenerated}/${count} questions for ${section}`);
+    return res.status(200).json({ 
+      questions: allQuestions, 
+      source: 'AI',
+      model: FREE_MODEL,
+      aiGenerated: totalAiGenerated,
+      requested: count
+    });
   }
 
-  if (successData) {
-    console.log(`[OpenRouter] Success after ${totalAttempts + 1} attempts, generated ${successData.questions.length} questions`);
-    return res.status(200).json(successData);
-  }
-
-  console.error(`[OpenRouter] All attempts failed after ${totalAttempts + 1} total attempts. Last error: ${lastError}`);
+  console.error(`[OpenRouter] Generation failed for ${section}`);
   return res.status(503).json({ 
-    error: `AI service unavailable after ${totalAttempts + 1} attempts`,
-    details: lastError,
-    aiGenerated: 0
+    error: 'AI service unavailable',
+    details: 'Failed to generate any questions',
+    questions: [],
+    aiGenerated: 0,
+    requested: count
   });
 }

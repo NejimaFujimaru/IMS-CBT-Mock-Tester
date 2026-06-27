@@ -1,11 +1,3 @@
-```
-# Dependencies
-node_modules/
+```javascript
 
-# Editors
-.vscode/
-
-# Environment
-.env
-.env.
 ```

@@ -860,7 +860,12 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: userPrompt, systemPrompt, section: sectionKey })
+      body: JSON.stringify({ 
+        prompt: userPrompt, 
+        systemPrompt, 
+        section: section.name,
+        count: count  // Pass the full count to API
+      })
     });
 
     if (!response.ok) {
@@ -869,32 +874,37 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
     }
 
     const data = await response.json();
-    let content = data.choices?.[0]?.message?.content || '';
     
-    if (!content.trim()) {
-      console.warn(`[AI] Empty response for ${sectionKey}`);
-      return [];
-    }
-
-    // Clean and parse with robust recovery
-    content = cleanAIResponse(content);
-    const parsed = parseJSONWithRecovery(content);
-
-    if (!parsed || !Array.isArray(parsed.questions)) {
-      console.warn(`[AI] Invalid JSON structure for ${sectionKey}, got:`, typeof parsed);
-      return [];
+    // Check if API returned aiGenerated count
+    const aiGeneratedCount = data.aiGenerated !== undefined ? data.aiGenerated : 0;
+    
+    // Use the questions from API response directly (new batch format)
+    let parsedQuestions = data.questions || [];
+    
+    // Fallback to old parsing if new format not available
+    if (!parsedQuestions || parsedQuestions.length === 0) {
+      let content = data.choices?.[0]?.message?.content || '';
+      if (!content.trim()) {
+        console.warn(`[AI] Empty response for ${sectionKey}`);
+        return [];
+      }
+      content = cleanAIResponse(content);
+      const parsed = parseJSONWithRecovery(content);
+      if (parsed && Array.isArray(parsed.questions)) {
+        parsedQuestions = parsed.questions;
+      }
     }
 
     const validQuestions = [];
     const seenHashes = new Set();
 
-    for (const q of parsed.questions) {
+    for (const q of parsedQuestions) {
       if (!validateQuestion(q)) continue;
       
       const candidate = {
-        question: q.question.trim(),
-        options: q.options.map(o => String(o).trim()),
-        correctIndex: q.correctIndex,
+        question: q.question?.trim() || '',
+        options: q.options?.map(o => String(o).trim()) || [],
+        correctIndex: q.correctIndex !== undefined ? q.correctIndex : (q.answer ? q.options?.indexOf(q.answer) : -1),
         explanation: q.explanation?.trim() || 'Explanation not provided.',
         topic: q.topic || section.name,
         difficulty: ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
@@ -903,6 +913,9 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
         isAI: true, 
         passageId: null
       };
+      
+      // Skip if missing required fields
+      if (!candidate.question || candidate.options.length !== 4 || candidate.correctIndex < 0) continue;
       
       const hash = questionHash(candidate);
       if (seenHashes.has(hash) || isDuplicate(candidate, globalUsedSet, globalUsedList)) continue;
@@ -915,7 +928,7 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
       if (validQuestions.length >= count) break;
     }
 
-    console.log(`[AI] Generated ${validQuestions.length}/${count} valid questions for ${sectionKey}`);
+    console.log(`[AI] Generated ${validQuestions.length}/${count} valid questions for ${sectionKey} (API reported: ${aiGeneratedCount})`);
     return validQuestions;
     
   } catch (err) {
