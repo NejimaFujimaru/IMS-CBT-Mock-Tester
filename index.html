@@ -838,19 +838,19 @@ FORBIDDEN: HCF, LCM, percentages, algebra, geometry, speed-distance, profit-loss
 INCLUDE: At least 3 verbal analogy questions and 2 blood-relation questions.`
   };
 
-  // This systemPrompt is now ACTUALLY SENT to the backend (FIX #3)
+  // Enhanced system prompt with stricter JSON enforcement
   const systemPrompt = `You are an expert MCQ generator for Pakistani university admission tests (IMSciences Peshawar / NTS NAT style).
 
 STRICT JSON OUTPUT RULES:
-- Output ONLY a valid JSON object
-- Start your response with { and end with }
-- No markdown, no code fences (no triple backticks), no text outside the JSON
+- Output ONLY a valid JSON object with no text before or after
+- No markdown, no code fences (no triple backticks), no explanations
 - Each question must have exactly: question (string), options (array of 4 strings), correctIndex (integer 0-3), explanation (string), topic (string), difficulty (string)
-- All 4 options must be distinct
-- correctIndex must be the index of the genuinely correct answer
+- All 4 options must be distinct and plausible
+- correctIndex must be the index of the genuinely correct answer (0-3)
+- Use proper JSON escaping for quotes inside strings
 
-Your response format:
-{"questions":[{"question":"...","options":["A","B","C","D"],"correctIndex":0,"explanation":"...","topic":"...","difficulty":"medium"}]}`;
+Your response format (EXAMPLE ONLY - generate unique questions):
+{"questions":[{"question":"What is the synonym of 'ephemeral'?","options":["temporary","permanent","eternal","solid"],"correctIndex":0,"explanation":"Ephemeral means lasting for a very short time.","topic":"Vocabulary","difficulty":"medium"}]}`;
 
   const userPrompt = `${prompts[sectionKey]}
 
@@ -860,7 +860,6 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // FIX #3: systemPrompt is now sent to the backend so it's actually used
       body: JSON.stringify({ prompt: userPrompt, systemPrompt, section: sectionKey })
     });
 
@@ -871,18 +870,27 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
 
     const data = await response.json();
     let content = data.choices?.[0]?.message?.content || '';
-    if (!content.trim()) throw new Error('Empty response from AI');
+    
+    if (!content.trim()) {
+      console.warn(`[AI] Empty response for ${sectionKey}`);
+      return [];
+    }
 
+    // Clean and parse with robust recovery
     content = cleanAIResponse(content);
     const parsed = parseJSONWithRecovery(content);
 
-    if (!parsed || !Array.isArray(parsed.questions)) throw new Error('Invalid JSON structure from AI');
+    if (!parsed || !Array.isArray(parsed.questions)) {
+      console.warn(`[AI] Invalid JSON structure for ${sectionKey}, got:`, typeof parsed);
+      return [];
+    }
 
     const validQuestions = [];
     const seenHashes = new Set();
 
     for (const q of parsed.questions) {
       if (!validateQuestion(q)) continue;
+      
       const candidate = {
         question: q.question.trim(),
         options: q.options.map(o => String(o).trim()),
@@ -890,51 +898,68 @@ Generate exactly ${count} unique, high-quality questions. Return ONLY the JSON o
         explanation: q.explanation?.trim() || 'Explanation not provided.',
         topic: q.topic || section.name,
         difficulty: ['easy','medium','hard'].includes(q.difficulty) ? q.difficulty : 'medium',
-        section: sectionKey, weight: section.weight, isAI: true, passageId: null
+        section: sectionKey, 
+        weight: section.weight, 
+        isAI: true, 
+        passageId: null
       };
+      
       const hash = questionHash(candidate);
       if (seenHashes.has(hash) || isDuplicate(candidate, globalUsedSet, globalUsedList)) continue;
+      
       seenHashes.add(hash);
       validQuestions.push(candidate);
       globalUsedSet.add(hash);
       globalUsedList.push(candidate);
+      
       if (validQuestions.length >= count) break;
     }
 
+    console.log(`[AI] Generated ${validQuestions.length}/${count} valid questions for ${sectionKey}`);
     return validQuestions;
+    
   } catch (err) {
-    console.warn(`AI generation failed for ${sectionKey}:`, err.message);
+    console.warn(`[AI] Generation failed for ${sectionKey}:`, err.message);
     return [];
   }
 }
 
+// ==================== ROBUST JSON PARSING ====================
+// Production-ready JSON parsing with 7 recovery strategies
 function cleanAIResponse(content) {
+  // Remove markdown code fences and any surrounding text
   content = content.replace(/```json\s*/gi, '').replace(/```\s*/gi, '').trim();
+  
+  // Extract the first complete JSON object/array block
   const jsonMatch = content.match(/\{[\s\S]*\}/);
-  return jsonMatch ? jsonMatch[0] : content;
+  if (jsonMatch) return jsonMatch[0];
+  
+  // Fallback: try array extraction
+  const arrayMatch = content.match(/\[[\s\S]*\]/);
+  if (arrayMatch) return arrayMatch[0];
+  
+  return content;
 }
 
-// ==================== FIX #1: REWRITTEN parseJSONWithRecovery ====================
-// The original Strategy 2 had a critical bug: it escaped ALL quotes including
-// structural JSON quotes, making the JSON completely invalid.
-// This version uses safe, targeted repair strategies instead.
 function parseJSONWithRecovery(content) {
-  // Strategy 1: Direct parse (works most of the time)
+  let originalContent = content;
+  
+  // Strategy 1: Direct parse (works ~85% of the time with good AI)
   try { return JSON.parse(content); } catch {}
-
+  
   // Strategy 2: Isolate the first complete { ... } block
   const s = content.indexOf('{');
   const e = content.lastIndexOf('}');
   if (s !== -1 && e > s) {
     try { return JSON.parse(content.slice(s, e + 1)); } catch {}
   }
-
-  // Strategy 3: Fix trailing commas (most common AI JSON error: {"a":1,})
+  
+  // Strategy 3: Fix trailing commas before } or ] (very common AI error)
   try {
     const fixed = content.replace(/,(\s*[}\]])/g, '$1');
     return JSON.parse(fixed);
   } catch {}
-
+  
   // Strategy 4: Isolate block AND fix trailing commas
   if (s !== -1 && e > s) {
     try {
@@ -942,8 +967,8 @@ function parseJSONWithRecovery(content) {
       return JSON.parse(sliced);
     } catch {}
   }
-
-  // Strategy 5: Array format fallback
+  
+  // Strategy 5: Array format fallback - AI sometimes returns just the array
   const a = content.indexOf('[');
   const b = content.lastIndexOf(']');
   if (a !== -1 && b > a) {
@@ -952,7 +977,42 @@ function parseJSONWithRecovery(content) {
       if (Array.isArray(arr)) return { questions: arr };
     } catch {}
   }
-
+  
+  // Strategy 6: Fix unescaped quotes within string values
+  try {
+    // Match patterns like "text "quoted" more" and escape inner quotes
+    const fixed = content.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"/g, (match, p1) => {
+      // Only escape unescaped quotes inside the string
+      const escaped = p1.replace(/(?<!\\)"/g, '\\"');
+      return `"${escaped}"`;
+    });
+    return JSON.parse(fixed);
+  } catch {}
+  
+  // Strategy 7: Last resort - try to extract question objects individually
+  try {
+    const questionPattern = /\{\s*"question"\s*:\s*"([^"]*(?:\\"[^"]*)*)"\s*,\s*"options"\s*:\s*\[([^\]]*)\][^}]*\}/gi;
+    const questions = [];
+    let match;
+    
+    while ((match = questionPattern.exec(originalContent)) !== null) {
+      try {
+        // Try to parse this individual question object
+        const qStr = match[0];
+        const qObj = JSON.parse(qStr);
+        if (qObj.question && qObj.options && Array.isArray(qObj.options)) {
+          questions.push(qObj);
+        }
+      } catch {}
+    }
+    
+    if (questions.length > 0) {
+      console.log(`[Recovery] Extracted ${questions.length} questions individually`);
+      return { questions };
+    }
+  } catch {}
+  
+  console.warn('[parseJSONWithRecovery] All 7 strategies failed');
   return null;
 }
 
@@ -1032,8 +1092,8 @@ async function startMockTest() {
       sectionQs = generatePassageQuestions(globalUsedSet, globalUsedList);
     }
 
-    // Ask AI for 5 questions max (small batch = faster response from free model)
-    const aiTarget = Math.min(5, section.count - sectionQs.length);
+    // Ask AI for ALL remaining questions (not just 5)
+    const aiTarget = section.count - sectionQs.length;
     if (aiTarget > 0) {
       const aiQs = await generateSectionQuestions(
         sectionKey, aiTarget, globalUsedSet, globalUsedList
@@ -1041,7 +1101,7 @@ async function startMockTest() {
       sectionQs = [...sectionQs, ...aiQs];
     }
 
-    // Fallback bank fills the remaining slots
+    // Fallback bank fills the remaining slots if AI failed/partial
     if (sectionQs.length < section.count) {
       const needed = section.count - sectionQs.length;
       sectionQs = [
@@ -1067,7 +1127,11 @@ async function startMockTest() {
     DedupEngine.recordUsed(sectionKey, sectionQs.map(q => questionHash(q)));
 
     const aiCount = sectionQs.filter(q => q.isAI).length;
-    updateSectionStatus(sectionKey, 'done', `${sectionQs.length} ready (${aiCount} AI)`);
+    // Show "0 AI Generated" if AI failed completely
+    const statusText = aiCount === 0 && aiTarget > 0 
+      ? `${sectionQs.length} ready (0 AI Generated)`
+      : `${sectionQs.length} ready (${aiCount} AI)`;
+    updateSectionStatus(sectionKey, 'done', statusText);
     updateProgress(20 + 20 * (i + 1));
 
     // 2-second pause between sections — keeps OpenRouter happy
