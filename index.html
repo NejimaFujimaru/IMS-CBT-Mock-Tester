@@ -67,6 +67,44 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 
 .main-content { max-width: 1440px; margin: 0 auto; padding: 20px 28px; }
 
+/* Sidebar Layout */
+.test-layout { display: flex; gap: 20px; position: relative; }
+.test-main { flex: 1; min-width: 0; }
+.test-sidebar { width: 280px; flex-shrink: 0; }
+
+/* Collapsible Sidebar */
+.sidebar-container { background: var(--bg-secondary); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); overflow: hidden; position: sticky; top: 82px; }
+.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border-color); background: linear-gradient(to bottom, var(--bg-secondary), rgba(0,0,0,0.01)); cursor: pointer; user-select: none; }
+.sidebar-header:hover { background: var(--bg-primary); }
+.sidebar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.sidebar-toggle { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+.sidebar-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+.sidebar-toggle.collapsed { transform: rotate(-90deg); }
+.sidebar-content { max-height: calc(100vh - 180px); overflow-y: auto; padding: 12px; transition: max-height 0.3s ease; }
+.sidebar-content.collapsed { max-height: 0; padding: 0; overflow: hidden; }
+
+/* Question Grid in Sidebar */
+.question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.nav-dot { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; transition: all 0.15s; color: var(--text-primary); }
+.nav-dot:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.nav-dot.current { border-color: var(--accent-blue); background: var(--accent-blue); color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
+.nav-dot.answered { background: var(--accent-green); color: white; border-color: var(--accent-green); }
+.nav-dot.marked { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
+.nav-dot.answered-marked { background: linear-gradient(135deg, var(--accent-green), var(--accent-orange)); color: white; border-color: transparent; }
+
+/* Submit Button in Sidebar */
+.sidebar-footer { padding: 14px; border-top: 1px solid var(--border-color); background: var(--bg-primary); }
+.submit-btn { width: 100%; justify-content: center; padding: 12px 20px; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+  .test-layout { flex-direction: column; }
+  .test-sidebar { width: 100%; }
+  .sidebar-container { position: static; }
+  .sidebar-content { max-height: 200px; }
+  .question-grid { grid-template-columns: repeat(8, 1fr); }
+}
+
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
 .stat-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); }
 .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
@@ -108,14 +146,6 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .option-item.selected .option-radio { border-color: var(--accent-blue); background: var(--accent-blue); }
 .option-item.selected .option-radio::after { content: ''; width: 7px; height: 7px; border-radius: 50%; background: white; }
 .option-text { font-size: 15px; color: var(--text-primary); line-height: 1.4; }
-
-.question-navigator { display: flex; flex-wrap: wrap; gap: 5px; padding: 14px 22px; border-top: 1px solid var(--border-color); background: var(--bg-primary); max-height: 130px; overflow-y: auto; }
-.nav-dot { width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; transition: all 0.15s; color: var(--text-primary); }
-.nav-dot:hover { border-color: var(--accent-blue); transform: translateY(-1px); }
-.nav-dot.current { border-color: var(--accent-blue); background: var(--accent-blue); color: white; }
-.nav-dot.answered { background: var(--accent-green); color: white; border-color: var(--accent-green); }
-.nav-dot.marked { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
-.nav-dot.answered-marked { background: linear-gradient(135deg, var(--accent-green), var(--accent-orange)); color: white; border-color: transparent; }
 
 .question-footer { padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border-color); background: var(--bg-secondary); }
 
@@ -372,56 +402,70 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
   </div>
 
   <div class="view" id="view-test">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Time Remaining <i class="fa-regular fa-clock"></i></div>
-        <div class="stat-value" id="timerDisplay">01:30:00</div>
-        <div class="stat-progress"><div class="stat-progress-fill blue" id="timerProgress" style="width:100%"></div></div>
-        <div class="stat-footer" id="timerTotal">01:30:00 total</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Pace <i class="fa-solid fa-gauge-high"></i></div>
-        <div style="font-size:18px;font-weight:600;color:var(--accent-blue);" id="paceText">On track</div>
-        <div class="pace-badge on-track" id="paceBadge"><span class="dot"></span> <span id="paceDetail">Good pace</span></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Answered <i class="fa-regular fa-circle-check"></i></div>
-        <div class="stat-value"><span id="answeredCount">0</span> <span class="stat-sub">/ <span id="totalQuestions">87</span></span></div>
-        <div class="stat-progress"><div class="stat-progress-fill green" id="answeredProgress" style="width:0%"></div></div>
-        <div class="stat-footer" id="answeredPercent">0% complete</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Saved for Later <i class="fa-regular fa-bookmark"></i></div>
-        <div class="stat-value"><span id="savedCount">0</span> <span class="stat-sub">/ 26</span></div>
-        <div class="stat-footer">Max 26 questions can be deferred</div>
-      </div>
-    </div>
-
-    <div class="question-card">
-      <div class="question-header">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <div class="question-number-label" id="questionNumberLabel">Question 1</div>
-          <div class="section-tag" id="sectionTag"><i class="fa-solid fa-language"></i> English</div>
+    <div class="test-layout">
+      <div class="test-main">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Time Remaining <i class="fa-regular fa-clock"></i></div>
+            <div class="stat-value" id="timerDisplay">01:30:00</div>
+            <div class="stat-progress"><div class="stat-progress-fill blue" id="timerProgress" style="width:100%"></div></div>
+            <div class="stat-footer" id="timerTotal">01:30:00 total</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Pace <i class="fa-solid fa-gauge-high"></i></div>
+            <div style="font-size:18px;font-weight:600;color:var(--accent-blue);" id="paceText">On track</div>
+            <div class="pace-badge on-track" id="paceBadge"><span class="dot"></span> <span id="paceDetail">Good pace</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Answered <i class="fa-regular fa-circle-check"></i></div>
+            <div class="stat-value"><span id="answeredCount">0</span> <span class="stat-sub">/ <span id="totalQuestions">87</span></span></div>
+            <div class="stat-progress"><div class="stat-progress-fill green" id="answeredProgress" style="width:0%"></div></div>
+            <div class="stat-footer" id="answeredPercent">0% complete</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Saved for Later <i class="fa-regular fa-bookmark"></i></div>
+            <div class="stat-value"><span id="savedCount">0</span> <span class="stat-sub">/ 26</span></div>
+            <div class="stat-footer">Max 26 questions can be deferred</div>
+          </div>
         </div>
-        <div class="question-weight" id="questionWeight">Weight 1</div>
-      </div>
-      <div class="question-body">
-        <div id="passageContainer"></div>
-        <div class="question-text" id="questionText">Loading question...</div>
-        <div class="options-list" id="optionsList"></div>
-      </div>
-      <div class="question-navigator" id="questionNavigator"></div>
-      <div class="question-footer">
-        <div style="display:flex;gap:10px;">
-          <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()"><i class="fa-solid fa-chevron-left"></i> Previous</button>
-          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Save &amp; Next <i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-        <button class="btn btn-outline" id="markBtn" onclick="toggleMark()"><i class="fa-regular fa-bookmark"></i> Answer it Later</button>
-      </div>
-    </div>
 
-    <div style="text-align:center;margin-top:16px;">
-      <button class="btn btn-danger btn-lg" onclick="confirmSubmit()"><i class="fa-solid fa-flag-checkered"></i> Submit Test</button>
+        <div class="question-card">
+          <div class="question-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="question-number-label" id="questionNumberLabel">Question 1</div>
+              <div class="section-tag" id="sectionTag"><i class="fa-solid fa-language"></i> English</div>
+            </div>
+            <div class="question-weight" id="questionWeight">Weight 1</div>
+          </div>
+          <div class="question-body">
+            <div id="passageContainer"></div>
+            <div class="question-text" id="questionText">Loading question...</div>
+            <div class="options-list" id="optionsList"></div>
+          </div>
+          <div class="question-footer">
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+              <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Save &amp; Next <i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+            <button class="btn btn-outline" id="markBtn" onclick="toggleMark()"><i class="fa-regular fa-bookmark"></i> Answer it Later</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="test-sidebar">
+        <div class="sidebar-container">
+          <div class="sidebar-header" onclick="toggleSidebar()">
+            <div class="sidebar-title"><i class="fa-regular fa-compass"></i> Question Navigator</div>
+            <div class="sidebar-toggle" id="sidebarToggle"><i class="fa-solid fa-chevron-up"></i></div>
+          </div>
+          <div class="sidebar-content" id="sidebarContent">
+            <div class="question-grid" id="questionNavigator"></div>
+          </div>
+          <div class="sidebar-footer">
+            <button class="btn btn-danger submit-btn" onclick="confirmSubmit()"><i class="fa-solid fa-flag-checkered"></i> Submit Test</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1351,6 +1395,11 @@ function prevQuestion() {
 function goToQuestion(idx) {
   state.currentQuestionIndex = idx;
   renderQuestion();
+  // Auto-expand sidebar when navigating via dots
+  const content = document.getElementById('sidebarContent');
+  if (content.classList.contains('collapsed')) {
+    toggleSidebar();
+  }
 }
 
 function toggleMark() {
@@ -1391,6 +1440,23 @@ function updateNavigatorHighlight() {
   document.querySelectorAll('.nav-dot').forEach((dot, idx) => {
     dot.classList.toggle('current', idx === state.currentQuestionIndex);
   });
+}
+
+// ==================== SIDEBAR TOGGLE ====================
+function toggleSidebar() {
+  const content = document.getElementById('sidebarContent');
+  const toggle = document.getElementById('sidebarToggle');
+  const isCollapsed = content.classList.contains('collapsed');
+  
+  if (isCollapsed) {
+    content.classList.remove('collapsed');
+    toggle.classList.remove('collapsed');
+    toggle.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
+  } else {
+    content.classList.add('collapsed');
+    toggle.classList.add('collapsed');
+    toggle.innerHTML = '<i class="fa-solid fa-chevron-down"></i>';
+  }
 }
 
 function updateStats() {
