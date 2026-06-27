@@ -18,10 +18,13 @@ const RETRY_CONFIG = {
 };
 
 async function fetchWikipediaContext() {
+  const currentYear = new Date().getFullYear(); // Evaluates to 2026
+  const recentElectionYear = 2024;             // The most recent general election year
+
   const topics = [
-    'Pakistan_in_2025',
+    `Pakistan_in_${currentYear}`,
     'CPEC',
-    'Pakistan_general_election,_2024',
+    `Pakistan_general_election,_${recentElectionYear}`,
     'Foreign_relations_of_Pakistan',
     'Economy_of_Pakistan',
     'Current_events',
@@ -29,36 +32,36 @@ async function fetchWikipediaContext() {
     'Karachi',
     'Lahore'
   ];
+
+  let contextText = "";
   
-  const summaries = [];
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  
-  try {
-    const shuffled = topics.sort(() => 0.5 - Math.random()).slice(0, 4);
-    
-    for (const topic of shuffled) {
-      try {
-        const res = await fetch(
-          `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`,
-          { 
-            signal: controller.signal,
-            headers: { 'User-Agent': 'IMS-CBT-Mock/1.0' }
-          }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.extract) {
-            summaries.push(`${topic.replace(/_/g, ' ')}: ${data.extract.slice(0, 500)}`);
-          }
-        }
-      } catch { /* skip */ }
+  // Fetch summaries in parallel but limit concurrency if needed (native fetch handles this well enough for 9 topics)
+  const promises = topics.map(async (topic) => {
+    try {
+      const response = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`);
+      if (!response.ok) return null;
+      const data = await response.json();
+      // Extract relevant text: extract + first few sentences of content if available
+      let text = data.extract || "";
+      if (text.length > 300) text = text.substring(0, 300) + "...";
+      return `${data.title}: ${text}`;
+    } catch (e) {
+      console.error(`Failed to fetch Wikipedia for ${topic}:`, e.message);
+      return null;
     }
-  } finally {
-    clearTimeout(timeout);
-  }
+  });
+
+  const results = await Promise.all(promises);
   
-  return summaries;
+  // Filter out nulls and join
+  const validContexts = results.filter(r => r !== null);
+  if (validContexts.length > 0) {
+    contextText = "\n\n--- REAL-TIME CONTEXT FOR QUESTION GENERATION ---\n" + validContexts.join("\n") + "\n--- END CONTEXT ---\n";
+  } else {
+    contextText = "\n\n(Note: Real-time context fetching failed. Use general knowledge about Pakistan, its cities, economy, and foreign relations as of 2026.)\n";
+  }
+
+  return contextText;
 }
 
 function calculateBackoff(attempt) {
@@ -90,23 +93,23 @@ function cleanAIResponse(content) {
 
 async function generateBatch(batchCount, section, wikiContext) {
   let contextAddition = '';
-  if (wikiContext && wikiContext.length > 0) {
+  if (wikiContext && typeof wikiContext === 'string' && wikiContext.length > 0) {
     contextAddition = '\n\n=== CURRENT AFFAIRS CONTEXT ===\n' +
-      wikiContext.join('\n\n').slice(0, 2000) +
+      wikiContext.slice(0, 2500) +
       '\n=== END CONTEXT ===\n' +
-      '\nFocus: Pakistan National Affairs, International Relations (UN, OIC, SCO), ' +
-      'Major Cities, Economic Developments, Political Landscape 2024-2025, CPEC, Kashmir.';
+      '\nFocus: Pakistan National Affairs (2026), International Relations (UN, OIC, SCO), ' +
+      'Major Cities (Islamabad, Karachi, Lahore), Economic Developments, Political Landscape, CPEC, Kashmir.';
   }
 
   const prompt = `Generate EXACTLY ${batchCount} multiple-choice questions for "${section}".
-Format: JSON array only. NO markdown. NO code fences.
+Format: JSON array only. NO markdown. NO code fences. NO text before or after.
 Structure: [{"question":"...","options":["A)","B)","C)","D)"],"answer":"Correct Option","explanation":"..."}]
 ${contextAddition}
 Rules:
 1. Output ONLY the JSON array starting with [ and ending with ].
 2. Each question must have exactly 4 options.
 3. Answer must match one option text exactly.
-4. For GK: Use 30-40% questions from Current Affairs context above.`;
+4. For GK: Use 40-50% questions from Current Affairs context above.`;
 
   const systemMessage = 'You are an expert exam generator. Output ONLY valid JSON arrays. No explanations outside JSON.';
 
@@ -134,7 +137,7 @@ Rules:
             { role: 'user', content: prompt },
           ],
           temperature: 0.7,
-          max_tokens: 3000,
+          max_tokens: 4000,
           response_format: { type: 'json_object' },
         }),
       });
