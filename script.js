@@ -255,7 +255,7 @@ function goToQuestion(index) {
     state.currentQuestionIndex = index;
     renderQuestion(index);
     updateNavigator();
-    expandSidebar();
+    // Do NOT automatically close sidebar - user must manually click toggle
   }
 }
 
@@ -336,8 +336,10 @@ function renderQuestion(index) {
   if (sectionProgressTextEl) sectionProgressTextEl.textContent = `${index + 1} of ${state.test.questions.length}`;
   if (breadcrumbSubjectEl) breadcrumbSubjectEl.textContent = CONFIG.SECTIONS[q.section].name;
 }
+
 function renderOptions(q) {
   const list = document.getElementById('optionsList');
+  if (!list) return;
   list.innerHTML = '';
   q.options.forEach((opt, i) => {
     const item = document.createElement('div');
@@ -356,16 +358,42 @@ function updateNavigator() {
   if (!nav || !state.test) return;
   
   nav.innerHTML = '';
-  state.test.questions.forEach((q, i) => {
-    const dot = document.createElement('div');
-    dot.className = 'nav-dot';
-    if (i === state.currentQuestionIndex) dot.classList.add('current');
-    if (state.answers[q.id] !== undefined) dot.classList.add('answered');
-    if (state.markedQuestions.has(q.id)) dot.classList.add('marked');
-    if (state.answers[q.id] !== undefined && state.markedQuestions.has(q.id)) dot.classList.add('answered-marked');
-    dot.textContent = i + 1;
-    dot.onclick = () => goToQuestion(i);
-    nav.appendChild(dot);
+  
+  // Group questions by section and render with headers
+  CONFIG.SECTION_ORDER.forEach(sectionKey => {
+    const sectionConfig = CONFIG.SECTIONS[sectionKey];
+    const sectionQuestions = state.test.questions.filter(q => q.section === sectionKey);
+    
+    if (sectionQuestions.length === 0) return;
+    
+    // Create section header
+    const header = document.createElement('div');
+    header.className = 'sidebar-section-header';
+    const currentCount = sectionQuestions.length;
+    const targetCount = StreamingEngine.targetCounts[sectionKey] || sectionConfig.count;
+    header.innerHTML = `<strong>${sectionConfig.name}</strong> <span>(${currentCount}/${targetCount})</span>`;
+    nav.appendChild(header);
+    
+    // Create container for this section's dots
+    const sectionGrid = document.createElement('div');
+    sectionGrid.className = 'sidebar-section-grid';
+    
+    sectionQuestions.forEach((q, i) => {
+      // Find global index
+      const globalIndex = state.test.questions.findIndex(qq => qq.id === q.id);
+      
+      const dot = document.createElement('div');
+      dot.className = 'nav-dot';
+      if (globalIndex === state.currentQuestionIndex) dot.classList.add('current');
+      if (state.answers[q.id] !== undefined) dot.classList.add('answered');
+      if (state.markedQuestions.has(q.id)) dot.classList.add('marked');
+      if (state.answers[q.id] !== undefined && state.markedQuestions.has(q.id)) dot.classList.add('answered-marked');
+      dot.textContent = globalIndex + 1;
+      dot.onclick = () => goToQuestion(globalIndex);
+      sectionGrid.appendChild(dot);
+    });
+    
+    nav.appendChild(sectionGrid);
   });
 }
 
@@ -558,46 +586,41 @@ function parseAIResponse(content) {
 const StreamingEngine = {
   targetCounts: { english: 20, gk: 20, math: 30, analytical: 17 },
   backgroundInterval: null,
+  currentSectionIndex: 0, // Track which section we're filling
   
   async startFastTest() {
     const loadingOverlay = document.getElementById('loadingOverlay');
     const loadingMessage = document.getElementById('loadingMessage');
     
     loadingOverlay.style.display = 'flex';
-    loadingMessage.textContent = 'Starting test with initial questions...';
+    loadingMessage.textContent = 'Generating initial 10 English questions...';
     
     state.test = { questions: [] };
     state.answers = {};
     state.markedQuestions = new Set();
     state.currentQuestionIndex = 0;
     
-    // Generate ONLY 1 question per section to start immediately (~3 seconds)
-    const initialPromises = CONFIG.SECTION_ORDER.map(async (section) => {
-      try {
-        const q = await this.generateSingleQuestion(section);
-        if (q) {
-          q.section = section;
-          q.weight = CONFIG.SECTIONS[section].weight;
-          return q;
-        }
-      } catch (e) {
-        console.warn(`Failed to generate initial ${section}:`, e.message);
-        Toast.error(`Failed to generate ${section} question. Using fallback.`);
-      }
+    // Generate exactly 10 English questions immediately to start the test
+    try {
+      const initialQuestions = await this.generateBatchQuestions('english', 10);
+      initialQuestions.forEach(q => {
+        q.section = 'english';
+        q.weight = CONFIG.SECTIONS['english'].weight;
+      });
+      state.test.questions.push(...initialQuestions);
+    } catch (e) {
+      console.warn('Failed to generate initial English questions:', e.message);
+      Toast.error('Failed to generate English questions. Using fallback.');
       // Fallback to static bank
-      const staticQs = await KnowledgeBank.loadSection(section);
-      if (staticQs.length > 0) {
-        const q = staticQs[0];
-        q.section = section;
-        q.weight = CONFIG.SECTIONS[section].weight;
+      const staticQs = await KnowledgeBank.loadSection('english');
+      const fallback = staticQs.slice(0, 10);
+      fallback.forEach(q => {
+        q.section = 'english';
+        q.weight = CONFIG.SECTIONS['english'].weight;
         q.aiGenerated = false;
-        return q;
-      }
-      return null;
-    });
-    
-    const initialQuestions = (await Promise.all(initialPromises)).filter(q => q !== null);
-    state.test.questions.push(...initialQuestions);
+      });
+      state.test.questions.push(...fallback);
+    }
     
     loadingOverlay.style.display = 'none';
     
@@ -614,10 +637,11 @@ const StreamingEngine = {
       setTimeout(submitTest, 2000);
     });
     
-    expandSidebar();
-    Toast.success(`Test started with ${state.test.questions.length} questions. More loading in background...`);
+    expandSidebar(); // Expand sidebar on initial load so user can see the questions
+    Toast.success(`Test started with ${state.test.questions.length} English questions. More loading in background...`);
     
-    // Begin background filling
+    // Begin sequential background filling (starts from english since we already have 10)
+    this.currentSectionIndex = 0; // Start from english
     this.startBackgroundFilling();
   },
   
@@ -645,18 +669,33 @@ const StreamingEngine = {
   },
   
   startBackgroundFilling() {
-    const sectionIndices = { english: 1, gk: 1, math: 1, analytical: 1 };
-    
     this.backgroundInterval = setInterval(async () => {
+      // Check if all sections are complete - if so, stop immediately
+      const allComplete = CONFIG.SECTION_ORDER.every(s => 
+        state.test.questions.filter(q => q.section === s).length >= this.targetCounts[s]
+      );
+      
+      if (allComplete) {
+        this.stopBackgroundFilling();
+        Toast.success('All questions loaded!');
+        return;
+      }
+      
       let anyAdded = false;
       
-      for (const section of CONFIG.SECTION_ORDER) {
+      // Sequential Section Filler: Process sections in order
+      for (let i = this.currentSectionIndex; i < CONFIG.SECTION_ORDER.length; i++) {
+        const section = CONFIG.SECTION_ORDER[i];
         const currentCount = state.test.questions.filter(q => q.section === section).length;
         const targetCount = this.targetCounts[section];
         
-        if (currentCount >= targetCount) continue;
+        if (currentCount >= targetCount) {
+          // This section is full, move to next section
+          this.currentSectionIndex = i + 1;
+          continue;
+        }
         
-        // Generate 5 at a time
+        // Generate 5 at a time for this section
         const batchSize = Math.min(5, targetCount - currentCount);
         
         try {
@@ -668,10 +707,8 @@ const StreamingEngine = {
               q.weight = CONFIG.SECTIONS[section].weight;
             });
             
-            const currentIndex = state.currentQuestionIndex;
             state.test.questions.push(...newQuestions);
             
-            // Update navigator if we're not on a question that would be affected
             updateNavigator();
             updateStats();
             
@@ -695,18 +732,27 @@ const StreamingEngine = {
             anyAdded = true;
           }
         }
+        
+        // After adding to current section, check if it's now complete
+        const newCount = state.test.questions.filter(q => q.section === section).length;
+        if (newCount >= targetCount) {
+          this.currentSectionIndex = i + 1; // Move to next section
+        }
+        
+        // Only process one section per interval tick (sequential, not parallel)
+        break;
       }
       
       if (anyAdded) {
         Toast.info('New questions added to your pool.');
       }
       
-      // Check if all sections are complete
-      const allComplete = CONFIG.SECTION_ORDER.every(s => 
+      // Final check if all sections are complete after this iteration
+      const finalCheck = CONFIG.SECTION_ORDER.every(s => 
         state.test.questions.filter(q => q.section === s).length >= this.targetCounts[s]
       );
       
-      if (allComplete) {
+      if (finalCheck) {
         this.stopBackgroundFilling();
         Toast.success('All questions loaded!');
       }
@@ -804,27 +850,35 @@ function submitTest() {
   const percentage = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
   const passed = percentage >= CONFIG.PASS_MARK;
   
-  // Display results
-  document.getElementById('resultsCandidateInfo').textContent = `${state.candidateName} | ID: ${state.candidateId}`;
-  document.getElementById('scorePercent').textContent = `${percentage}%`;
-  document.getElementById('scoreCircle').setAttribute('stroke-dasharray', `${2 * Math.PI * 70}`);
-  document.getElementById('scoreCircle').setAttribute('stroke-dashoffset', `${2 * Math.PI * 70 * (1 - percentage / 100)}`);
+  // Display results - with null checks
+  const resultsCandidateInfoEl = document.getElementById('resultsCandidateInfo');
+  const scorePercentEl = document.getElementById('scorePercent');
+  const scoreCircleEl = document.getElementById('scoreCircle');
+  const correctCountEl = document.getElementById('correctCount');
+  const wrongCountEl = document.getElementById('wrongCount');
+  const unattemptedCountEl = document.getElementById('unattemptedCount');
   
-  const scoreColor = passed ? 'var(--accent-green)' : 'var(--accent-red)';
-  document.getElementById('scoreCircle').setAttribute('stroke', scoreColor);
-  document.getElementById('scorePercent').style.color = scoreColor;
-  
-  // totalScore element removed
-  document.getElementById('correctCount').textContent = correct;
-  document.getElementById('wrongCount').textContent = incorrect;
-  document.getElementById('unattemptedCount').textContent = skipped;
+  if (resultsCandidateInfoEl) resultsCandidateInfoEl.textContent = `${state.candidateName} | ID: ${state.candidateId}`;
+  if (scorePercentEl) scorePercentEl.textContent = `${percentage}%`;
+  if (scoreCircleEl) {
+    scoreCircleEl.setAttribute('stroke-dasharray', `${2 * Math.PI * 70}`);
+    scoreCircleEl.setAttribute('stroke-dashoffset', `${2 * Math.PI * 70 * (1 - percentage / 100)}`);
+    const scoreColor = passed ? 'var(--accent-green)' : 'var(--accent-red)';
+    scoreCircleEl.setAttribute('stroke', scoreColor);
+  }
+  if (scorePercentEl) scorePercentEl.style.color = passed ? 'var(--accent-green)' : 'var(--accent-red)';
+  if (correctCountEl) correctCountEl.textContent = correct;
+  if (wrongCountEl) wrongCountEl.textContent = incorrect;
+  if (unattemptedCountEl) unattemptedCountEl.textContent = skipped;
   
   // Render review
   renderReview();
   
   navigateTo('results');
-  document.querySelector('.test-sidebar').classList.remove('expanded');
-  document.querySelector('.test-main').classList.remove('with-sidebar');
+  const sidebarEl = document.querySelector('.test-sidebar');
+  const mainEl = document.querySelector('.test-main');
+  if (sidebarEl) sidebarEl.classList.remove('expanded');
+  if (mainEl) mainEl.classList.remove('with-sidebar');
   
   Toast.success(`Test submitted! You scored ${percentage}%`);
 }

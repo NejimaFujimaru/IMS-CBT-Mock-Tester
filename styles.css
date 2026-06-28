@@ -54,8 +54,8 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 .candidate-name { font-size: 14px; font-weight: 600; }
 .candidate-id { font-size: 12px; opacity: 0.8; font-family: 'SF Mono', Monaco, monospace; }
 
-/* Sidebar Toggle Button in Header */
-.sidebar-toggle-btn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
+/* Sidebar Toggle Button in Header - Compact Icon Only */
+.sidebar-toggle-btn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 10px; border-radius: 6px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; min-width: 36px; }
 .sidebar-toggle-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-1px); }
 .sidebar-toggle-btn i { font-size: 14px; }
 
@@ -92,6 +92,13 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 
 /* Question Grid in Sidebar */
 .question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+
+/* Grouped Section Headers and Grids */
+.sidebar-section-header { font-size: 12px; font-weight: 700; color: var(--text-primary); padding: 8px 6px 6px; margin-top: 8px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.5px; }
+.sidebar-section-header:first-child { margin-top: 0; }
+.sidebar-section-header span { font-size: 10px; font-weight: 500; color: var(--text-muted); text-transform: none; }
+.sidebar-section-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 4px; }
+
 .nav-dot { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; transition: all 0.15s; color: var(--text-primary); }
 .nav-dot:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
 .nav-dot.current { border-color: var(--accent-blue); background: var(--accent-blue); color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }

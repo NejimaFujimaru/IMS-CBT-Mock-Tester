@@ -1,3 +1,4 @@
+```gitignore
 # Compiled and build artifacts
 *.pyc
 __pycache__/
@@ -13,7 +14,7 @@ venv/
 .venv/
 .env
 .env.local
-*.env.*
+.env.*
 
 # Logs and temp files
 *.log
@@ -23,8 +24,10 @@ venv/
 # Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# OS
+# System files
 .DS_Store
 Thumbs.db
 
@@ -32,6 +35,14 @@ Thumbs.db
 coverage/
 htmlcov/
 .coverage
+
+# Python specific
+.mypy_cache/
+.pytest_cache/
+
+# Java/Gradle
+.gradle/
+*.class
 
 # Compressed files
 *.zip
@@ -56,3 +67,4 @@ htmlcov/
 *.tar.bz2
 *.tar.xz
 *.tar.zst
+```

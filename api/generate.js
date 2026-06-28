@@ -1,12 +1,13 @@
 // api/generate.js — Vercel Serverless, maxDuration: 60s
-// BATCH generation (10 at a time) for maximum reliability with openrouter:auto
+// BATCH generation (10 at a time) for maximum reliability with openrouter/free
+// Uses ONLY free models to guarantee zero cost
 // Automatically handles model rate limits by routing to available free models
 
 export const config = { maxDuration: 60 };
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const FREE_MODEL = 'openrouter/auto';
+const FREE_MODEL = 'openrouter/free';
 const BATCH_SIZE = 10;
 
 const RETRY_CONFIG = {
