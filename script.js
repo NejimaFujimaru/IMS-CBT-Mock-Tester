@@ -606,6 +606,8 @@ const StreamingEngine = {
       initialQuestions.forEach(q => {
         q.section = 'english';
         q.weight = CONFIG.SECTIONS['english'].weight;
+        // Ensure unique IDs for fallback questions too
+        if (!q.id) q.id = `english_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       });
       state.test.questions.push(...initialQuestions);
     } catch (e) {
@@ -614,10 +616,12 @@ const StreamingEngine = {
       // Fallback to static bank
       const staticQs = await KnowledgeBank.loadSection('english');
       const fallback = staticQs.slice(0, 10);
-      fallback.forEach(q => {
+      fallback.forEach((q, idx) => {
         q.section = 'english';
         q.weight = CONFIG.SECTIONS['english'].weight;
         q.aiGenerated = false;
+        // Assign unique ID to fallback questions
+        if (!q.id) q.id = `english_static_${idx}_${Date.now()}`;
       });
       state.test.questions.push(...fallback);
     }
@@ -705,6 +709,8 @@ const StreamingEngine = {
             newQuestions.forEach(q => {
               q.section = section;
               q.weight = CONFIG.SECTIONS[section].weight;
+              // Ensure unique IDs for background generated questions
+              if (!q.id) q.id = `${section}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
             });
             
             state.test.questions.push(...newQuestions);
@@ -721,10 +727,12 @@ const StreamingEngine = {
           const staticQs = await KnowledgeBank.loadSection(section);
           const available = staticQs.slice(currentCount, currentCount + batchSize);
           if (available.length > 0) {
-            available.forEach(q => {
+            available.forEach((q, idx) => {
               q.section = section;
               q.weight = CONFIG.SECTIONS[section].weight;
               q.aiGenerated = false;
+              // Assign unique ID to fallback questions
+              if (!q.id) q.id = `${section}_static_${idx}_${Date.now()}`;
             });
             state.test.questions.push(...available);
             updateNavigator();
@@ -775,13 +783,15 @@ const StreamingEngine = {
     const content = data.choices?.[0]?.message?.content || '';
     let questions = parseAIResponse(content);
     
-    // Deduplicate
+    // Deduplicate and assign unique IDs
     const existingHashes = new Set(state.test.questions.map(questionHash));
     questions = questions.filter(q => {
       const hash = questionHash(q);
       if (existingHashes.has(hash)) return false;
       existingHashes.add(hash);
       q.aiGenerated = true;
+      // Assign unique ID to each question
+      q.id = `${section}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       return true;
     });
     
