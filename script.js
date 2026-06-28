@@ -528,6 +528,202 @@ function parseAIResponse(content) {
   return [];
 }
 
+// ==================== STREAMING FAST-START MODE ====================
+const StreamingEngine = {
+  targetCounts: { english: 20, gk: 20, math: 30, analytical: 17 },
+  backgroundInterval: null,
+  
+  async startFastTest() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingMessage = document.getElementById('loadingMessage');
+    
+    loadingOverlay.style.display = 'flex';
+    loadingMessage.textContent = 'Starting test with initial questions...';
+    
+    state.test = { questions: [] };
+    state.answers = {};
+    state.markedQuestions = new Set();
+    state.currentQuestionIndex = 0;
+    
+    // Generate ONLY 1 question per section to start immediately (~3 seconds)
+    const initialPromises = CONFIG.SECTION_ORDER.map(async (section) => {
+      try {
+        const q = await this.generateSingleQuestion(section);
+        if (q) {
+          q.section = section;
+          q.weight = CONFIG.SECTIONS[section].weight;
+          return q;
+        }
+      } catch (e) {
+        console.warn(`Failed to generate initial ${section}:`, e.message);
+        Toast.error(`Failed to generate ${section} question. Using fallback.`);
+      }
+      // Fallback to static bank
+      const staticQs = await KnowledgeBank.loadSection(section);
+      if (staticQs.length > 0) {
+        const q = staticQs[0];
+        q.section = section;
+        q.weight = CONFIG.SECTIONS[section].weight;
+        q.aiGenerated = false;
+        return q;
+      }
+      return null;
+    });
+    
+    const initialQuestions = (await Promise.all(initialPromises)).filter(q => q !== null);
+    state.test.questions.push(...initialQuestions);
+    
+    loadingOverlay.style.display = 'none';
+    
+    // Initialize test UI and START IMMEDIATELY
+    navigateTo('test');
+    renderQuestion(0);
+    updateNavigator();
+    updateStats();
+    showTestUI();
+    
+    // Start background timer
+    BackgroundTimer.start(CONFIG.TOTAL_TIME, updateTimerDisplay, () => {
+      Toast.warning('Time is up! Submitting your test...');
+      setTimeout(submitTest, 2000);
+    });
+    
+    expandSidebar();
+    Toast.success(`Test started with ${state.test.questions.length} questions. More loading in background...`);
+    
+    // Begin background filling
+    this.startBackgroundFilling();
+  },
+  
+  async generateSingleQuestion(section) {
+    const prompt = `Generate exactly 1 unique multiple-choice question for ${CONFIG.SECTIONS[section].name}. Return ONLY a JSON array with 1 object: [{"question":"...","options":["A)","B)","C)","D)"],"answer":0,"explanation":"..."}]`;
+    const systemPrompt = 'You are an expert exam question writer. Output ONLY valid JSON array with exactly 1 question.';
+    
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, systemPrompt, section, count: 1 })
+    });
+    
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    let questions = parseAIResponse(content);
+    
+    if (questions.length > 0) {
+      questions[0].aiGenerated = true;
+      return questions[0];
+    }
+    return null;
+  },
+  
+  startBackgroundFilling() {
+    const sectionIndices = { english: 1, gk: 1, math: 1, analytical: 1 };
+    
+    this.backgroundInterval = setInterval(async () => {
+      let anyAdded = false;
+      
+      for (const section of CONFIG.SECTION_ORDER) {
+        const currentCount = state.test.questions.filter(q => q.section === section).length;
+        const targetCount = this.targetCounts[section];
+        
+        if (currentCount >= targetCount) continue;
+        
+        // Generate 5 at a time
+        const batchSize = Math.min(5, targetCount - currentCount);
+        
+        try {
+          const newQuestions = await this.generateBatchQuestions(section, batchSize);
+          
+          if (newQuestions.length > 0) {
+            newQuestions.forEach(q => {
+              q.section = section;
+              q.weight = CONFIG.SECTIONS[section].weight;
+            });
+            
+            const currentIndex = state.currentQuestionIndex;
+            state.test.questions.push(...newQuestions);
+            
+            // Update navigator if we're not on a question that would be affected
+            updateNavigator();
+            updateStats();
+            
+            anyAdded = true;
+            console.log(`[Streaming] Added ${newQuestions.length} ${section} questions. Total: ${state.test.questions.length}`);
+          }
+        } catch (e) {
+          console.warn(`Background generation failed for ${section}:`, e.message);
+          // Fill from static bank silently
+          const staticQs = await KnowledgeBank.loadSection(section);
+          const available = staticQs.slice(currentCount, currentCount + batchSize);
+          if (available.length > 0) {
+            available.forEach(q => {
+              q.section = section;
+              q.weight = CONFIG.SECTIONS[section].weight;
+              q.aiGenerated = false;
+            });
+            state.test.questions.push(...available);
+            updateNavigator();
+            updateStats();
+            anyAdded = true;
+          }
+        }
+      }
+      
+      if (anyAdded) {
+        Toast.info('New questions added to your pool.');
+      }
+      
+      // Check if all sections are complete
+      const allComplete = CONFIG.SECTION_ORDER.every(s => 
+        state.test.questions.filter(q => q.section === s).length >= this.targetCounts[s]
+      );
+      
+      if (allComplete) {
+        this.stopBackgroundFilling();
+        Toast.success('All questions loaded!');
+      }
+    }, 3000); // Run every 3 seconds
+  },
+  
+  async generateBatchQuestions(section, count) {
+    const prompt = `Generate exactly ${count} unique multiple-choice questions for ${CONFIG.SECTIONS[section].name}. Return ONLY a JSON array.`;
+    const systemPrompt = 'You are an expert exam question writer. Output ONLY valid JSON array.';
+    
+    const response = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, systemPrompt, section, count })
+    });
+    
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || '';
+    let questions = parseAIResponse(content);
+    
+    // Deduplicate
+    const existingHashes = new Set(state.test.questions.map(questionHash));
+    questions = questions.filter(q => {
+      const hash = questionHash(q);
+      if (existingHashes.has(hash)) return false;
+      existingHashes.add(hash);
+      q.aiGenerated = true;
+      return true;
+    });
+    
+    return questions;
+  },
+  
+  stopBackgroundFilling() {
+    if (this.backgroundInterval) {
+      clearInterval(this.backgroundInterval);
+      this.backgroundInterval = null;
+    }
+  }
+};
+
 async function startMockTest() {
   const nameInput = document.getElementById('candidateName');
   state.candidateName = nameInput.value.trim() || 'Practice Candidate';
@@ -536,81 +732,8 @@ async function startMockTest() {
   document.getElementById('headerCandidateName').textContent = state.candidateName;
   document.getElementById('headerCandidateId').textContent = state.candidateId;
   
-  // Show loading overlay
-  const loadingOverlay = document.getElementById('loadingOverlay');
-  const loadingProgressFill = document.getElementById('loadingProgressFill');
-  const sectionProgressList = document.getElementById('sectionProgressList');
-  const loadingMessage = document.getElementById('loadingMessage');
-  const loadingRetryMessage = document.getElementById('loadingRetryMessage');
-  
-  loadingOverlay.style.display = 'flex';
-  loadingMessage.textContent = 'Generating fresh questions with AI...';
-  loadingRetryMessage.textContent = '';
-  
-  state.test = { questions: [] };
-  state.answers = {};
-  state.markedQuestions = new Set();
-  state.currentQuestionIndex = 0;
-  
-  let completedSections = 0;
-  const totalSections = CONFIG.SECTION_ORDER.length;
-  
-  sectionProgressList.innerHTML = '';
-  CONFIG.SECTION_ORDER.forEach(section => {
-    const item = document.createElement('div');
-    item.className = 'section-progress-item pending';
-    item.id = `section-progress-${section}`;
-    item.innerHTML = `<i class="fa-solid fa-circle-pending"></i> <span>${CONFIG.SECTIONS[section].name}</span>`;
-    sectionProgressList.appendChild(item);
-  });
-  
-  // Generate questions section by section
-  for (const section of CONFIG.SECTION_ORDER) {
-    const progressItem = document.getElementById(`section-progress-${section}`);
-    if (progressItem) {
-      progressItem.className = 'section-progress-item generating';
-      progressItem.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Generating ${CONFIG.SECTIONS[section].name}...</span>`;
-    }
-    
-    const count = CONFIG.SECTIONS[section].count;
-    const questions = await generateSectionQuestions(section, count, state.test.questions);
-    
-    state.test.questions.push(...questions);
-    completedSections++;
-    loadingProgressFill.style.width = `${(completedSections / totalSections) * 100}%`;
-    
-    if (progressItem) {
-      const aiCount = questions.filter(q => q.aiGenerated).length;
-      const fallbackCount = questions.length - aiCount;
-      progressItem.className = 'section-progress-item done';
-      progressItem.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${questions.length} ${CONFIG.SECTIONS[section].name} questions ready (${aiCount} AI Generated${fallbackCount > 0 ? `, ${fallbackCount} from bank` : ''})</span>`;
-    }
-  }
-  
-  // Check if we got enough questions
-  if (state.test.questions.length < CONFIG.TOTAL_QUESTIONS * 0.5) {
-    Toast.warning('Limited questions generated. Using extended fallback bank.');
-  }
-  
-  loadingOverlay.style.display = 'none';
-  
-  // Initialize test UI
-  navigateTo('test');
-  renderQuestion(0);
-  updateNavigator();
-  updateStats();
-  showTestUI();
-  
-  // Start background timer
-  BackgroundTimer.start(CONFIG.TOTAL_TIME, updateTimerDisplay, () => {
-    Toast.warning('Time is up! Submitting your test...');
-    setTimeout(submitTest, 2000);
-  });
-  
-  // Expand sidebar initially
-  expandSidebar();
-  
-  Toast.success(`Test started! ${state.test.questions.length} questions loaded.`);
+  // Use Streaming Fast-Start Mode
+  await StreamingEngine.startFastTest();
 }
 
 // ==================== TEST SUBMISSION ====================
