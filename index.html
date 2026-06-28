@@ -68,42 +68,13 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 
 .main-content { max-width: 1440px; margin: 0 auto; padding: 20px 28px; }
 
-/* Sidebar Layout */
-.test-layout { display: flex; gap: 20px; position: relative; }
-.test-main { flex: 1; min-width: 0; }
-.test-sidebar { width: 280px; flex-shrink: 0; }
-
-/* Collapsible Sidebar */
-.sidebar-container { background: var(--bg-secondary); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); overflow: hidden; position: sticky; top: 82px; }
-.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border-color); background: linear-gradient(to bottom, var(--bg-secondary), rgba(0,0,0,0.01)); cursor: pointer; user-select: none; }
-.sidebar-header:hover { background: var(--bg-primary); }
-.sidebar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
-.sidebar-toggle { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
-.sidebar-toggle:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
-.sidebar-toggle.collapsed { transform: rotate(-90deg); }
-.sidebar-content { max-height: calc(100vh - 180px); overflow-y: auto; padding: 12px; transition: max-height 0.3s ease; }
-.sidebar-content.collapsed { max-height: 0; padding: 0; overflow: hidden; }
-
-/* Question Grid in Sidebar */
-.question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.nav-dot { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; transition: all 0.15s; color: var(--text-primary); }
-.nav-dot:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-.nav-dot.current { border-color: var(--accent-blue); background: var(--accent-blue); color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3); }
-.nav-dot.answered { background: var(--accent-green); color: white; border-color: var(--accent-green); }
-.nav-dot.marked { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
-.nav-dot.answered-marked { background: linear-gradient(135deg, var(--accent-green), var(--accent-orange)); color: white; border-color: transparent; }
-
-/* Submit Button in Sidebar */
-.sidebar-footer { padding: 14px; border-top: 1px solid var(--border-color); background: var(--bg-primary); }
-.submit-btn { width: 100%; justify-content: center; padding: 12px 20px; font-size: 13px; font-weight: 700; letter-spacing: 0.3px; }
+/* Sidebar Layout - Removed, now in styles.css */
 
 /* Mobile Responsive */
 @media (max-width: 900px) {
   .test-layout { flex-direction: column; }
   .test-sidebar { width: 100%; }
   .sidebar-container { position: static; }
-  .sidebar-content { max-height: 200px; }
-  .question-grid { grid-template-columns: repeat(8, 1fr); }
 }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
@@ -473,7 +444,7 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
             </button>
           </div>
           <div class="sidebar-content" id="sidebarContent">
-            <div class="question-grid" id="questionNavigator"></div>
+            <div id="questionNavigator"></div>
           </div>
         </div>
       </div>

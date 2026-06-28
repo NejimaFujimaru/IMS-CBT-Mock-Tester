@@ -359,26 +359,30 @@ function updateNavigator() {
   
   nav.innerHTML = '';
   
-  // Group questions by section and render with headers
+  // Group questions by section and render with headers (VERTICAL LAYOUT)
   CONFIG.SECTION_ORDER.forEach(sectionKey => {
     const sectionConfig = CONFIG.SECTIONS[sectionKey];
     const sectionQuestions = state.test.questions.filter(q => q.section === sectionKey);
     
     if (sectionQuestions.length === 0) return;
     
-    // Create section header
+    // Create section group container
+    const sectionGroup = document.createElement('div');
+    sectionGroup.className = 'sidebar-section-group';
+    
+    // Create section header with color class
     const header = document.createElement('div');
-    header.className = 'sidebar-section-header';
+    header.className = `sidebar-section-header ${sectionKey}`;
     const currentCount = sectionQuestions.length;
     const targetCount = StreamingEngine.targetCounts[sectionKey] || sectionConfig.count;
-    header.innerHTML = `<strong>${sectionConfig.name}</strong> <span>(${currentCount}/${targetCount})</span>`;
-    nav.appendChild(header);
+    header.innerHTML = `<i class="fa-solid ${sectionConfig.icon}"></i> ${sectionConfig.name} <span>(${currentCount}/${targetCount})</span>`;
+    sectionGroup.appendChild(header);
     
-    // Create container for this section's dots
-    const sectionGrid = document.createElement('div');
-    sectionGrid.className = 'sidebar-section-grid';
+    // Create vertical list for this section's dots
+    const sectionList = document.createElement('div');
+    sectionList.className = 'sidebar-section-list';
     
-    sectionQuestions.forEach((q, i) => {
+    sectionQuestions.forEach((q) => {
       // Find global index
       const globalIndex = state.test.questions.findIndex(qq => qq.id === q.id);
       
@@ -390,10 +394,11 @@ function updateNavigator() {
       if (state.answers[q.id] !== undefined && state.markedQuestions.has(q.id)) dot.classList.add('answered-marked');
       dot.textContent = globalIndex + 1;
       dot.onclick = () => goToQuestion(globalIndex);
-      sectionGrid.appendChild(dot);
+      sectionList.appendChild(dot);
     });
     
-    nav.appendChild(sectionGrid);
+    sectionGroup.appendChild(sectionList);
+    nav.appendChild(sectionGroup);
   });
 }
 
