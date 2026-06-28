@@ -300,30 +300,42 @@ function toggleMark() {
 function renderQuestion(index) {
   const q = state.test.questions[index];
   if (!q) return;
-  
-  document.getElementById('questionNumberLabel').textContent = `Question ${index + 1}`;
-  document.getElementById('sectionTag').innerHTML = `<i class="fa-solid ${CONFIG.SECTIONS[q.section].icon}"></i> ${CONFIG.SECTIONS[q.section].name}`;
-  document.getElementById('questionWeight').textContent = `Weight ${q.weight}`;
-  document.getElementById('questionText').textContent = q.question;
-  
-  const passageContainer = document.getElementById('passageContainer');
-  if (q.passage) {
-    passageContainer.innerHTML = `<div class="passage-box"><span class="passage-label">Passage</span>${q.passage}</div>`;
-  } else {
-    passageContainer.innerHTML = '';
-  }
-  
-  renderOptions(q);
-  
-  document.getElementById('prevBtn').disabled = index === 0;
-  document.getElementById('nextBtn').innerHTML = index === state.test.questions.length - 1 
-    ? 'Save & Submit <i class="fa-solid fa-flag-checkered"></i>' 
-    : 'Save & Next <i class="fa-solid fa-chevron-right"></i>';
-  
-  document.getElementById('sectionProgressText').textContent = `${index + 1} of ${state.test.questions.length}`;
-  document.getElementById('breadcrumbSubject').textContent = CONFIG.SECTIONS[q.section].name;
-}
 
+  const questionNumberLabelEl = document.getElementById('questionNumberLabel');
+  const sectionTagEl = document.getElementById('sectionTag');
+  const questionWeightEl = document.getElementById('questionWeight');
+  const questionTextEl = document.getElementById('questionText');
+  const passageContainerEl = document.getElementById('passageContainer');
+  const prevBtnEl = document.getElementById('prevBtn');
+  const nextBtnEl = document.getElementById('nextBtn');
+  const sectionProgressTextEl = document.getElementById('sectionProgressText');
+  const breadcrumbSubjectEl = document.getElementById('breadcrumbSubject');
+
+  if (questionNumberLabelEl) questionNumberLabelEl.textContent = `Question ${index + 1}`;
+  if (sectionTagEl) sectionTagEl.innerHTML = `<i class="fa-solid ${CONFIG.SECTIONS[q.section].icon}"></i> ${CONFIG.SECTIONS[q.section].name}`;
+  if (questionWeightEl) questionWeightEl.textContent = `Weight ${q.weight}`;
+  if (questionTextEl) questionTextEl.textContent = q.question;
+
+  if (passageContainerEl) {
+    if (q.passage) {
+      passageContainerEl.innerHTML = `<div class="passage-box"><span class="passage-label">Passage</span>${q.passage}</div>`;
+    } else {
+      passageContainerEl.innerHTML = '';
+    }
+  }
+
+  renderOptions(q);
+
+  if (prevBtnEl) prevBtnEl.disabled = index === 0;
+  if (nextBtnEl) {
+    nextBtnEl.innerHTML = index === state.test.questions.length - 1 
+      ? 'Save & Submit <i class="fa-solid fa-flag-checkered"></i>' 
+      : 'Save & Next <i class="fa-solid fa-chevron-right"></i>';
+  }
+
+  if (sectionProgressTextEl) sectionProgressTextEl.textContent = `${index + 1} of ${state.test.questions.length}`;
+  if (breadcrumbSubjectEl) breadcrumbSubjectEl.textContent = CONFIG.SECTIONS[q.section].name;
+}
 function renderOptions(q) {
   const list = document.getElementById('optionsList');
   list.innerHTML = '';
@@ -374,8 +386,16 @@ function updateTimerDisplay(remaining) {
   const s = remaining % 60;
   const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   
-  document.getElementById('timerDisplay').textContent = timeStr;
-  document.getElementById('timerProgress').style.width = `${(remaining / CONFIG.TOTAL_TIME) * 100}%`;
+  // Update both timer displays (stats card and header)
+  const timerDisplayEl = document.getElementById('timerDisplay');
+  const headerTimerDisplayEl = document.getElementById('headerTimerDisplay');
+  if (timerDisplayEl) timerDisplayEl.textContent = timeStr;
+  if (headerTimerDisplayEl) headerTimerDisplayEl.textContent = timeStr;
+  
+  const timerProgressEl = document.getElementById('timerProgress');
+  if (timerProgressEl) {
+    timerProgressEl.style.width = `${(remaining / CONFIG.TOTAL_TIME) * 100}%`;
+  }
   
   const paceBadge = document.getElementById('paceBadge');
   const paceDetail = document.getElementById('paceDetail');
@@ -387,20 +407,26 @@ function updateTimerDisplay(remaining) {
   const expectedProgress = (elapsed / CONFIG.TOTAL_TIME) * totalQ;
   
   if (answered < expectedProgress * 0.8) {
-    paceBadge.className = 'pace-badge behind';
-    paceDetail.textContent = 'Need to speed up';
-    paceText.textContent = 'Behind pace';
-    paceText.style.color = 'var(--accent-orange)';
+    if (paceBadge) paceBadge.className = 'pace-badge behind';
+    if (paceDetail) paceDetail.textContent = 'Need to speed up';
+    if (paceText) {
+      paceText.textContent = 'Behind pace';
+      paceText.style.color = 'var(--accent-orange)';
+    }
   } else if (answered > expectedProgress * 1.2) {
-    paceBadge.className = 'pace-badge ahead';
-    paceDetail.textContent = 'Great progress';
-    paceText.textContent = 'Ahead of pace';
-    paceText.style.color = 'var(--accent-green)';
+    if (paceBadge) paceBadge.className = 'pace-badge ahead';
+    if (paceDetail) paceDetail.textContent = 'Great progress';
+    if (paceText) {
+      paceText.textContent = 'Ahead of pace';
+      paceText.style.color = 'var(--accent-green)';
+    }
   } else {
-    paceBadge.className = 'pace-badge on-track';
-    paceDetail.textContent = 'Good pace';
-    paceText.textContent = 'On track';
-    paceText.style.color = 'var(--accent-blue)';
+    if (paceBadge) paceBadge.className = 'pace-badge on-track';
+    if (paceDetail) paceDetail.textContent = 'Good pace';
+    if (paceText) {
+      paceText.textContent = 'On track';
+      paceText.style.color = 'var(--accent-blue)';
+    }
   }
 }
 
@@ -788,10 +814,10 @@ function submitTest() {
   document.getElementById('scoreCircle').setAttribute('stroke', scoreColor);
   document.getElementById('scorePercent').style.color = scoreColor;
   
-  document.getElementById('totalScore').textContent = `${earnedWeight}/${totalWeight}`;
+  // totalScore element removed
   document.getElementById('correctCount').textContent = correct;
-  document.getElementById('incorrectCount').textContent = incorrect;
-  document.getElementById('skippedCount').textContent = skipped;
+  document.getElementById('wrongCount').textContent = incorrect;
+  document.getElementById('unattemptedCount').textContent = skipped;
   
   // Render review
   renderReview();
