@@ -79,47 +79,98 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 
 .main-content { max-width: 1440px; margin: 0 auto; padding: 20px 28px; }
 
-/* ==================== SIDEBAR LAYOUT - COLLAPSIBLE TO SIDE ==================== */
+/* ==================== SIDEBAR LAYOUT - VERTICAL COLLAPSIBLE PANEL ==================== */
 .test-layout { display: flex; gap: 20px; position: relative; }
-.test-main { flex: 1; min-width: 0; transition: margin-left 0.3s ease; }
-.test-sidebar { width: 280px; flex-shrink: 0; position: fixed; left: 0; top: 62px; bottom: 0; z-index: 90; transform: translateX(-100%); transition: transform 0.3s ease; }
+.test-main { flex: 1; min-width: 0; transition: margin-right 0.3s ease; }
+.test-sidebar { width: 320px; flex-shrink: 0; position: fixed; right: 0; top: 62px; bottom: 0; z-index: 90; transform: translateX(100%); transition: transform 0.3s ease; background: var(--bg-secondary); }
 .test-sidebar.expanded { transform: translateX(0); }
-.test-main.with-sidebar { margin-left: 280px; }
+.test-main.with-sidebar { margin-right: 320px; }
 
-/* Collapsible Sidebar Container */
-.sidebar-container { background: var(--bg-secondary); border-radius: 0 var(--radius) var(--radius) 0; box-shadow: var(--shadow-md); border: 1px solid var(--border-color); border-left: none; height: calc(100vh - 62px); overflow: hidden; display: flex; flex-direction: column; }
-.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border-color); background: linear-gradient(to bottom, var(--bg-secondary), rgba(0,0,0,0.01)); }
-.sidebar-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
-.sidebar-content { flex: 1; overflow-y: auto; padding: 12px; }
+/* Collapsible Sidebar Container - Vertical Layout */
+.sidebar-container { background: var(--bg-secondary); border-radius: var(--radius) 0 0 var(--radius); box-shadow: var(--shadow-md); border: 1px solid var(--border-color); border-right: none; height: calc(100vh - 62px); overflow: hidden; display: flex; flex-direction: column; }
+.sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 2px solid var(--border-color); background: linear-gradient(to bottom, var(--bg-secondary), rgba(0,0,0,0.02)); flex-shrink: 0; }
+.sidebar-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--text-primary); display: flex; align-items: center; gap: 10px; }
+.sidebar-title i { color: var(--accent-blue); }
+.sidebar-content { flex: 1; overflow-y: auto; padding: 0; display: flex; flex-direction: column; }
 
-/* Question Grid in Sidebar */
-.question-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+/* Vertical Section Groups */
+.sidebar-section-group { border-bottom: 1px solid var(--border-color); }
+.sidebar-section-group:last-child { border-bottom: none; }
 
-/* Grouped Section Headers and Grids */
 .sidebar-section-header { 
-  font-size: 11px; 
+  font-size: 12px; 
   font-weight: 800; 
   color: var(--text-primary); 
-  padding: 10px 8px 8px; 
-  margin-top: 12px; 
-  border-bottom: 2px solid var(--border-color); 
+  padding: 14px 18px; 
   display: flex; 
   justify-content: space-between; 
   align-items: center; 
   text-transform: uppercase; 
   letter-spacing: 0.8px; 
-  background: linear-gradient(to right, rgba(37, 99, 235, 0.05), transparent);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+  border-left: 4px solid var(--accent-blue);
 }
-.sidebar-section-header:first-child { margin-top: 0; }
-.sidebar-section-header span { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: none; }
-.sidebar-section-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 8px; padding: 4px; background: rgba(0,0,0,0.02); border-radius: 6px; }
+.sidebar-section-header.english { border-left-color: #2563eb; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.03)); }
+.sidebar-section-header.gk { border-left-color: #059669; background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(5, 150, 105, 0.03)); }
+.sidebar-section-header.math { border-left-color: #d97706; background: linear-gradient(135deg, rgba(217, 119, 6, 0.1), rgba(217, 119, 6, 0.03)); }
+.sidebar-section-header.analytical { border-left-color: #7c3aed; background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.03)); }
+.sidebar-section-header span { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: none; background: rgba(0,0,0,0.05); padding: 3px 8px; border-radius: 12px; }
 
-.nav-dot { width: 100%; aspect-ratio: 1; border-radius: 6px; border: 1.5px solid var(--border-color); background: var(--bg-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; transition: all 0.15s; color: var(--text-primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.nav-dot:hover { border-color: var(--accent-blue); transform: translateY(-1px); box-shadow: 0 3px 8px rgba(37, 99, 235, 0.2); }
-.nav-dot.current { border-color: var(--accent-blue); background: var(--accent-blue); color: white; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4); animation: pulse-current 1.5s infinite; }
-.nav-dot.answered { background: var(--accent-green); color: white; border-color: var(--accent-green); box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3); }
-.nav-dot.marked { background: var(--accent-orange); color: white; border-color: var(--accent-orange); box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3); }
-.nav-dot.answered-marked { background: linear-gradient(135deg, var(--accent-green), var(--accent-orange)); color: white; border-color: transparent; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.4); }
+/* Vertical Question List per Section */
+.sidebar-section-list { display: flex; flex-direction: column; padding: 8px 12px; gap: 6px; }
+
+.nav-dot { 
+  width: 100%; 
+  height: 38px; 
+  border-radius: 8px; 
+  border: 1.5px solid var(--border-color); 
+  background: var(--bg-secondary); 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 12px; 
+  font-weight: 700; 
+  transition: all 0.15s; 
+  color: var(--text-primary); 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  position: relative;
+}
+.nav-dot:hover { 
+  border-color: var(--accent-blue); 
+  background: rgba(37, 99, 235, 0.06); 
+  transform: translateX(-2px); 
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2); 
+}
+.nav-dot.current { 
+  border-color: var(--accent-blue); 
+  background: var(--accent-blue); 
+  color: white; 
+  box-shadow: 0 3px 12px rgba(37, 99, 235, 0.4); 
+  transform: translateX(-3px);
+  animation: none;
+}
+.nav-dot.answered { 
+  background: var(--accent-green); 
+  color: white; 
+  border-color: var(--accent-green); 
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.3); 
+}
+.nav-dot.answered:hover {
+  background: #047857;
+}
+.nav-dot.marked { 
+  background: var(--accent-orange); 
+  color: white; 
+  border-color: var(--accent-orange); 
+  box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3); 
+}
+.nav-dot.answered-marked { 
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-orange)); 
+  color: white; 
+  border-color: transparent; 
+  box-shadow: 0 3px 10px rgba(217, 119, 6, 0.4); 
+}
 
 @keyframes pulse-current {
   0%, 100% { box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4); }
@@ -134,9 +185,8 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans
 @media (max-width: 900px) {
   .test-layout { flex-direction: column; }
   .test-sidebar { width: 100%; position: static; transform: none !important; height: auto; }
-  .test-main.with-sidebar { margin-left: 0; }
-  .sidebar-container { height: auto; border-radius: var(--radius); border-left: 1px solid var(--border-color); }
-  .question-grid { grid-template-columns: repeat(8, 1fr); }
+  .test-main.with-sidebar { margin-right: 0; }
+  .sidebar-container { height: auto; border-radius: var(--radius); border-right: 1px solid var(--border-color); }
 }
 
 /* ==================== STATS GRID ==================== */
